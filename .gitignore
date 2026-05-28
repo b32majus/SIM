@@ -1,0 +1,19 @@
+# Datos reales / archivos sensibles
+*.xlsx
+*.xls
+*.csv
+*.json
+
+# Permitir solo ejemplos sanitizados si se crean explícitamente
+!sample-data/
+!sample-data/*.xlsx
+!sample-data/*.csv
+!sample-data/*.json
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Backups locales
+*.bak
+*.backup

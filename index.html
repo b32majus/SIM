@@ -3092,8 +3092,8 @@ function procesarArchivoJSON() {
             // GUARDAR COPIA COMPLETA para permitir filtrado posterior
             hospitalesCompletos = [...hospitales];
 
-            // Poblar filtros dinámicos si no hay base de datos importada desde Excel
-            if (baseDatosImportada.length === 0 && hospitales.length > 0) {
+            // Al importar JSON, el JSON pasa a ser la fuente activa de filtrado para preservar proyectos, impactos y fusiones.
+            if (hospitales.length > 0) {
                 baseDatosImportada = hospitales.map(h => ({
                     codigo: h.codigo,
                     nombre: h.nombre,

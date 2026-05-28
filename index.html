@@ -1234,19 +1234,55 @@ function parsearPoblacion(valor) {
         return Math.max(0, Math.round(valor));
     }
     if (typeof valor === 'string') {
-        const str = valor.trim();
-        if (str === '') return 0;
-        // Eliminar espacios y separadores de miles (puntos, comas)
-        let cleaned = str.replace(/\s/g, '');
-        // Si contiene coma y no punto, tratar coma como decimal europeo
-        if (cleaned.includes(',') && !cleaned.includes('.')) {
-            cleaned = cleaned.replace(',', '.');
-        } else {
-            // Para población (siempre entero): eliminar todos los separadores
-            cleaned = cleaned.replace(/[.,]/g, '');
+        let s = valor.trim();
+        if (s === '') return 0;
+        s = s.replace(/\s/g, ''); // eliminar espacios
+        const dotCount = (s.match(/\./g) || []).length;
+        const commaCount = (s.match(/,/g) || []).length;
+
+        if (dotCount === 0 && commaCount === 0) {
+            const n = parseInt(s, 10);
+            return !isNaN(n) ? Math.max(0, n) : 0;
         }
-        const num = parseInt(cleaned, 10);
-        if (!isNaN(num)) return Math.max(0, num);
+
+        // Múltiples puntos → miles: "1.234.567" → "1234567"
+        if (dotCount > 1 && commaCount === 0) {
+            s = s.replace(/\./g, '');
+        }
+        // Múltiples comas → miles: "1,234,567" → "1234567"
+        else if (commaCount > 1 && dotCount === 0) {
+            s = s.replace(/,/g, '');
+        }
+        // Mezcla punto+coma → el último es decimal, los otros miles
+        else if (dotCount > 0 && commaCount > 0) {
+            if (s.lastIndexOf('.') > s.lastIndexOf(',')) {
+                s = s.replace(/,/g, '');
+                const parts = s.split('.');
+                s = parts.slice(0, -1).join('') + '.' + parts[parts.length - 1];
+            } else {
+                s = s.replace(/\./g, '');
+                const parts = s.split(',');
+                s = parts.slice(0, -1).join('') + '.' + parts[parts.length - 1];
+            }
+        }
+        // Un solo separador
+        else {
+            const sep = dotCount === 1 ? '.' : ',';
+            const idx = s.lastIndexOf(sep);
+            const after = s.slice(idx + 1);
+            if (after.length >= 1 && after.length <= 2 && /^\d{1,2}$/.test(after)) {
+                // Decimal: "123456,0" o "123456.0"
+                s = s.replace(sep, '.');
+                const n = parseFloat(s);
+                return !isNaN(n) ? Math.max(0, Math.round(n)) : 0;
+            } else {
+                // Miles: "123,456" o "123.456"
+                s = s.replace(sep, '');
+            }
+        }
+
+        const n = parseInt(s, 10);
+        return !isNaN(n) ? Math.max(0, n) : 0;
     }
     return 0;
 }
@@ -1421,7 +1457,7 @@ function importarHospitales() {
             if (hospitalesOmitidosPorPoblacion0.length > 0) {
                 statusMessage += ` | ${hospitalesOmitidosPorPoblacion0.length} omitidos por población 0`;
             }
-            const ispList = Object.entries(ispsEncontrados).map(([isp, count]) => `${isp}: ${count}`).join(', ');
+            const ispList = Object.entries(ispsEncontrados).map(([isp, count]) => `${escaparHTML(isp)}: ${count}`).join(', ');
             if (ispList) statusMessage += `<br><small>${ispList}</small>`;
             
             document.getElementById('statusHospitales').innerHTML = statusMessage;
@@ -1642,7 +1678,7 @@ function cargarSeleccionDinamica() {
     if (selectedProvincia) descParts.push(`Prov: ${selectedProvincia}`);
     territorioActual = descParts.join(' | ');
 
-    // Crear array de hospitales
+    // Crear array de hospitales con datos disponibles
     hospitales = [];
     filtered.forEach(hospitalOriginal => {
         const hospital = {
@@ -1652,11 +1688,13 @@ function cargarSeleccionDinamica() {
             provincia: hospitalOriginal.provincia,
             ca: hospitalOriginal.ca,
             poblacion: hospitalOriginal.poblacion,
-            coberturaAP: 0,
             isp: hospitalOriginal.isp,
-            proyectos: [],
-            impactos: {},
-            seleccionado: true
+            coberturaAP: hospitalOriginal.coberturaAP || 0,
+            proyectos: hospitalOriginal.proyectos ? [...hospitalOriginal.proyectos] : [],
+            impactos: hospitalOriginal.impactos ? { ...hospitalOriginal.impactos } : {},
+            seleccionado: hospitalOriginal.seleccionado !== undefined ? hospitalOriginal.seleccionado : true,
+            esFusionado: hospitalOriginal.esFusionado || false,
+            hospitalesOriginales: hospitalOriginal.hospitalesOriginales ? [...hospitalOriginal.hospitalesOriginales] : []
         };
         hospitales.push(hospital);
     });
@@ -1696,11 +1734,13 @@ function cargarTodosHospitales() {
             provincia: hospitalOriginal.provincia,
             ca: hospitalOriginal.ca,
             poblacion: hospitalOriginal.poblacion,
-            coberturaAP: 0,
             isp: hospitalOriginal.isp,
-            proyectos: [],
-            impactos: {},
-            seleccionado: true
+            coberturaAP: hospitalOriginal.coberturaAP || 0,
+            proyectos: hospitalOriginal.proyectos ? [...hospitalOriginal.proyectos] : [],
+            impactos: hospitalOriginal.impactos ? { ...hospitalOriginal.impactos } : {},
+            seleccionado: hospitalOriginal.seleccionado !== undefined ? hospitalOriginal.seleccionado : true,
+            esFusionado: hospitalOriginal.esFusionado || false,
+            hospitalesOriginales: hospitalOriginal.hospitalesOriginales ? [...hospitalOriginal.hospitalesOriginales] : []
         };
         hospitales.push(hospital);
     });
@@ -2146,7 +2186,7 @@ function actualizarTablaHospitales() {
         leyendaHTML += `<strong>🌍 CCAA:</strong> `;
         ccaaEnSeleccion.forEach(ca => {
             const bgColor = ccaaColors[ca] || '#f8fafc';
-            leyendaHTML += `<span style="background: ${bgColor}; padding: 2px 8px; border-radius: 4px; margin: 0 5px;">${ca}</span> `;
+            leyendaHTML += `<span style="background: ${bgColor}; padding: 2px 8px; border-radius: 4px; margin: 0 5px;">${escaparHTML(ca)}</span> `;
         });
     }
 
@@ -2157,13 +2197,13 @@ function actualizarTablaHospitales() {
         leyendaHTML += `<strong>👥 ISP:</strong> `;
         ispsEnSeleccion.forEach(isp => {
             const color = ispColors[isp] || '#999';
-            leyendaHTML += `<span style="border-left: 5px solid ${color}; padding: 2px 8px; margin: 0 5px; background: ${color}22;">${isp}</span> `;
+            leyendaHTML += `<span style="border-left: 5px solid ${color}; padding: 2px 8px; margin: 0 5px; background: ${color}22;">${escaparHTML(isp)}</span> `;
         });
     }
 
     // Si no hay leyenda (solo un ISP y una CCAA), mostrar información mínima
     if (!leyendaHTML) {
-        leyendaHTML = `<span style="color: #6b7280; font-size: 12px;">📍 ${territorioActual || 'Análisis Nacional'}</span>`;
+        leyendaHTML = `<span style="color: #6b7280; font-size: 12px;">📍 ${escaparHTML(territorioActual || 'Análisis Nacional')}</span>`;
     }
 
     // Agregar leyenda para hospitales fusionados si existe alguno
@@ -3060,7 +3100,13 @@ function procesarArchivoJSON() {
                     ca: h.ca,
                     provincia: h.provincia,
                     poblacion: h.poblacion,
-                    isp: h.isp
+                    isp: h.isp,
+                    coberturaAP: h.coberturaAP || 0,
+                    proyectos: h.proyectos ? [...h.proyectos] : [],
+                    impactos: h.impactos ? { ...h.impactos } : {},
+                    seleccionado: h.seleccionado !== undefined ? h.seleccionado : true,
+                    esFusionado: h.esFusionado || false,
+                    hospitalesOriginales: h.hospitalesOriginales ? [...h.hospitalesOriginales] : []
                 }));
                 poblarSelectores();
                 document.getElementById('filtrosContainer').style.display = 'block';
@@ -3073,7 +3119,7 @@ function procesarArchivoJSON() {
             actualizarResumenes();
             habilitarControles();
 
-            alert(`✅ JSON importado correctamente.\n🏥 ${hospitales.length} hospitales cargados.\n📊 Territorio: ${territorioActual}\n🔄 Ahora puedes filtrar por comunidades autónomas.`);
+            alert(`✅ JSON importado correctamente.\n🏥 ${hospitales.length} hospitales cargados.\n📊 Territorio: ${territorioActual}\n🔄 Los filtros se han actualizado con los datos del JSON. Puedes filtrar sin perder proyectos/cálculos importados.`);
 
         } catch (error) {
             console.error('Error al importar JSON:', error);

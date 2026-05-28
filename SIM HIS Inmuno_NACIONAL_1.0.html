@@ -1,0 +1,3233 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Herramienta HIS Inmuno - Análisis Nacional</title>
+    <style>
+        :root {
+            --future-dusk: #3F3950;
+            --transcendent-pink: #E3D8DA;
+            --aquatic-awe: #3EB7B3;
+            --sunset-coral: #FF6F61;
+            --ray-flower: #FFD23F;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: var(--transcendent-pink);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+
+        .header {
+            background: var(--sunset-coral);
+            color: white;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 2em;
+            font-weight: 500;
+        }
+
+        .subtitle {
+            opacity: 0.9;
+            margin-top: 8px;
+            font-size: 1.1em;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section h2 {
+            color: var(--future-dusk);
+            border-bottom: 2px solid var(--aquatic-awe);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .import-section {
+            background: var(--transcendent-pink);
+            border: 1px solid var(--aquatic-awe);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .import-section h3 {
+            margin: 0 0 15px 0;
+            color: var(--future-dusk);
+            font-size: 16px;
+        }
+
+        .import-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .import-card {
+            background: white;
+            border: 1px solid #e0e6ed;
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .import-card h4 {
+            margin: 0 0 12px 0;
+            color: var(--future-dusk);
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 4px;
+            font-size: 12px;
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 13px;
+            transition: border-color 0.2s;
+            box-sizing: border-box;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--aquatic-awe);
+            box-shadow: 0 0 0 3px rgba(62, 183, 179, 0.1);
+        }
+
+        .btn {
+            background: var(--aquatic-awe);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn:hover {
+            background: #2e8f8c;
+            transform: translateY(-1px);
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .btn-secondary {
+            background: var(--future-dusk);
+        }
+
+        .btn-secondary:hover {
+            background: #2b263b;
+        }
+
+        .btn-danger {
+            background: var(--sunset-coral);
+        }
+
+        .btn-danger:hover {
+            background: #cc594f;
+        }
+
+        .btn-success {
+            background: var(--aquatic-awe);
+        }
+
+        .btn-success:hover {
+            background: #2e8f8c;
+        }
+
+        .btn:disabled {
+            background: #d1d5db;
+            color: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .hospital-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 24px;
+            border: 1px solid #e0e6ed;
+        }
+
+        .hospital-table th {
+            background: var(--aquatic-awe);
+            color: white;
+            padding: 15px 10px;
+            text-align: center;
+            font-weight: 500;
+            font-size: 13px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .hospital-table td {
+            padding: 12px 8px;
+            text-align: center;
+            border-bottom: 1px solid #e0e6ed;
+            vertical-align: middle;
+            font-size: 13px;
+        }
+
+        .hospital-table tr:hover {
+            background: var(--transcendent-pink);
+        }
+
+        .hospital-row-andalucia {
+            background-color: #f0fdf4 !important;
+        }
+
+        .hospital-row-extremadura {
+            background-color: #eff6ff !important;
+        }
+
+        .hospital-row-canarias {
+            background-color: #fefce8 !important;
+        }
+
+        .hospital-row-andalucia:hover {
+            background-color: #dcfce7 !important;
+        }
+
+        .hospital-row-extremadura:hover {
+            background-color: #dbeafe !important;
+        }
+
+        .hospital-row-canarias:hover {
+            background-color: #fef3c7 !important;
+        }
+
+        .hospital-row-fusionado {
+            background-color: #f0f4ff !important;
+            border-left: 8px solid var(--aquatic-awe) !important;
+            box-shadow: 0 2px 4px rgba(62, 183, 179, 0.1) !important;
+        }
+
+        .hospital-row-fusionado:hover {
+            background-color: #e6efff !important;
+            box-shadow: 0 4px 8px rgba(62, 183, 179, 0.15) !important;
+        }
+
+        .hospital-name {
+            text-align: left !important;
+            font-weight: 500;
+            max-width: 250px;
+            font-size: 13px;
+            color: var(--future-dusk);
+        }
+
+        .codigo-hospital {
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            color: #6b7280;
+        }
+
+        .proyecto-tags {
+            text-align: left !important;
+            max-width: 250px;
+        }
+
+        .proyecto-tag {
+            position: relative;
+            display: inline-block;
+            margin: 2px;
+            padding: 4px 20px 4px 8px;
+            color: white;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 500;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+
+        .remove-proyecto-btn {
+            position: absolute;
+            top: 50%;
+            right: 4px;
+            transform: translateY(-50%);
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .remove-proyecto-btn:hover {
+            opacity: 1;
+        }
+
+        .add-proyecto-select {
+            margin-top: 5px;
+            width: 100%;
+            padding: 4px;
+            border-radius: 8px;
+            border: 1px solid #dfe3e8;
+            font-size: 11px;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background-color: white;
+            width: 95%;
+            max-width: 1000px;
+            max-height: 90vh;
+            border-radius: 12px;
+            overflow-y: auto;
+            padding: 0;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            padding: 20px;
+            background: var(--aquatic-awe);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .modal-title {
+            font-size: 1.4em;
+            font-weight: 500;
+            margin: 0;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: white;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+
+        .modal-close:hover {
+            opacity: 1;
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .impact-card {
+            background: white;
+            border: 1px solid #e0e6ed;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .impact-card h4 {
+            margin: 0 0 12px 0;
+            color: var(--future-dusk);
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .impact-metric {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .impact-metric:last-child {
+            border-bottom: none;
+        }
+
+        .impact-metric-label {
+            font-size: 13px;
+            color: #6b7280;
+        }
+
+        .impact-metric-value {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--future-dusk);
+        }
+
+        .summary-section {
+            background: #fce7f3;
+            border: 1px solid var(--aquatic-awe);
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .stat-card {
+            background: white;
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid #e0e6ed;
+            margin-bottom: 16px;
+        }
+
+        .stat-number {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: var(--aquatic-awe);
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            color: #6b7280;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #6b7280;
+            padding: 40px;
+            font-style: italic;
+        }
+
+        .controls {
+            text-align: center;
+            margin: 20px 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+
+        .status-success {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+
+        .status-warning {
+            background: #fff8e1;
+            color: #b38b00;
+            border: 1px solid var(--ray-flower);
+        }
+
+        .status-error {
+            background: #fecaca;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+
+        @media (max-width: 768px) {
+            .import-controls {
+                grid-template-columns: 1fr;
+            }
+
+            .hospital-table {
+                font-size: 11px;
+            }
+
+            .hospital-table th,
+            .hospital-table td {
+                padding: 8px 4px;
+            }
+        }
+
+        .resumen-impacto-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+        }
+
+        .stat-card-impacto {
+            background: #fce7f3;
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid var(--aquatic-awe);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .stat-card-impacto:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        #resumenTotalImpacto.active {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .collapsible-header {
+            background: var(--future-dusk);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            transition: background 0.3s ease;
+        }
+
+        .collapsible-header:hover {
+            background: #2b263b;
+        }
+
+        .collapsible-header h3 {
+            margin: 0;
+            font-size: 1.2em;
+            font-weight: 500;
+        }
+
+        .collapsible-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+            padding: 0 10px;
+        }
+
+        .collapsible-content.show {
+            overflow: visible;
+            padding-bottom: 20px;
+        }
+
+        .collapsible-icon {
+            font-size: 1.5em;
+            transition: transform 0.3s ease;
+        }
+
+        .collapsible-header .collapsible-icon {
+            transform: rotate(0deg);
+        }
+
+        .collapsible-header.active .collapsible-icon {
+            transform: rotate(90deg);
+        }
+
+        .total-summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            align-items: stretch;
+            margin-top: 15px;
+        }
+
+        .total-summary-grid .stat-card-impacto {
+            margin-bottom: 0;
+        }
+
+        .summary-row-centered {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            width: 100%;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .summary-row-centered .stat-card-impacto {
+            flex: 1;
+            max-width: 300px;
+        }
+
+        .hospital-summary-card {
+            background: white;
+            border: 1px solid #e0e6ed;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 15px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .hospital-summary-card h4 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: var(--future-dusk);
+        }
+
+        .hospital-summary-card .impact-metric-label {
+            font-size: 12px;
+        }
+
+        .hospital-summary-card .impact-metric-value {
+            font-size: 13px;
+        }
+
+        .hospital-summary-card .proyecto-tag {
+            font-size: 9px;
+            padding: 3px 15px 3px 6px;
+        }
+
+        .hospital-select-checkbox {
+            margin-right: 5px;
+            vertical-align: middle;
+        }
+
+        .cobertura-ap-input {
+            width: 80px;
+            padding: 4px 6px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        .hospital-tag {
+            display: inline-block;
+            background-color: #e0e7ff;
+            color: #3b82f6;
+            padding: 6px 10px;
+            margin: 4px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 500;
+            border: 1px solid #c7d2fe;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .therapeutic-area-section {
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .reuma-section {
+            background: #f0f8ff;
+            color: #1f2937;
+            border: 1px solid #3b82f6;
+        }
+
+        .hs-section {
+            background: #fff5f0;
+            color: #1f2937;
+            border: 1px solid #f97316;
+        }
+
+        .therapeutic-area-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .therapeutic-area-header h4 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            color: #1f2937;
+        }
+
+        .intervention-group {
+            margin-bottom: 20px;
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .reuma-section .expansion-group {
+            background: #206068;
+        }
+
+        .reuma-section .switch-group {
+            background: #FFC100;
+            color: #1f2937;
+        }
+
+        .hs-section .expansion-group {
+            background: #206068;
+        }
+
+        .hs-section .capacity-group {
+            background: #FF585D;
+        }
+
+        .hs-section .switch-group {
+            background: #FFC100;
+            color: #1f2937;
+        }
+
+        .intervention-header {
+            font-weight: 600;
+            font-size: 16px;
+            text-align: center;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: white;
+        }
+
+        .project-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .project-card {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 6px;
+            padding: 8px;
+            text-align: center;
+            backdrop-filter: blur(4px);
+            color: #1f2937;
+            font-weight: 600;
+        }
+
+        .project-label {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-bottom: 3px;
+            font-weight: 600;
+        }
+
+        .project-name {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .project-count {
+            font-weight: 700;
+            font-size: 18px;
+            color: #1f2937;
+            margin-top: 4px;
+        }
+
+        .metric-card {
+            background: rgba(255, 255, 255, 0.9);
+            color: #1f2937;
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .metric-primary {
+            background: rgba(255, 255, 255, 1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .metric-summary {
+            background: rgba(255, 255, 255, 1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border: 2px solid rgba(0,0,0,0.1);
+        }
+
+        .metric-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1f2937;
+        }
+
+        .metric-label {
+            font-size: 12px;
+            color: #6b7280;
+            font-weight: 500;
+            margin-top: 4px;
+        }
+
+        @media (max-width: 1024px) {
+            .section #resumenTotalImpacto .summary-section > div:last-child {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>🏥 Herramienta HIS Inmuno</h1>
+        <div class="subtitle">Herramienta de Impacto HIS Inmuno - Análisis Nacional Dinámico</div>
+    </div>
+    <div class="content">
+        <div class="section">
+            <h2>📊 Importación de Datos</h2>
+            <div class="import-section">
+                <h3>🚀 Comenzar Análisis</h3>
+                <p style="margin: 0 0 15px 0; color: var(--future-dusk); font-size: 13px;">
+                    Importa tu archivo Excel de hospitales para cargar automáticamente los hospitales ISP. 
+                    El archivo de parámetros es opcional - la herramienta incluye valores por defecto para todos los cálculos.
+                </p>
+                <div class="import-controls">
+                    <div class="import-card">
+                        <h4>📋 Base de Datos de Hospitales</h4>
+                        <div class="form-group">
+                            <label>Archivo "Base Datos HIS Impacto.xlsx"</label>
+                            <input accept=".xlsx,.xls" class="form-input" id="fileInputHospitales" onchange="importarHospitales()" type="file"/>
+                        </div>
+                        <div class="status-indicator status-warning" id="statusHospitales" style="display: none;">
+                            <span>⏳</span> Pendiente de importar
+                        </div>
+
+                        <div id="filtrosContainer" style="display: none; margin-top: 15px; padding-top: 15px; border-top: 1px solid #e0e6ed;">
+                            <h4 style="margin: 0 0 15px 0; color: var(--future-dusk); font-size: 14px; font-weight: 600;">🎯 Selección Nacional Dinámica</h4>
+                            <p style="margin: 0 0 12px 0; font-size: 12px; color: #6b7280;">
+                                Selecciona uno o varios filtros para cargar los hospitales deseados.
+                            </p>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+                                <div class="form-group">
+                                    <label>ISP / Responsable:</label>
+                                    <select id="filtroISP" class="form-input">
+                                        <option value="">Todos los ISP</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Comunidad Autónoma:</label>
+                                    <select id="filtroCCAA" class="form-input">
+                                        <option value="">Todas las CCAA</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Provincia:</label>
+                                    <select id="filtroProvincia" class="form-input">
+                                        <option value="">Todas las provincias</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap;">
+                                <button class="btn btn-small btn-success" id="btnCargarSeleccion" onclick="cargarSeleccionDinamica()" disabled>
+                                    📊 Cargar Selección
+                                </button>
+                                <button class="btn btn-small" id="btnCargarTodos" onclick="cargarTodosHospitales()" disabled style="background: var(--future-dusk); color: white;">
+                                    🏥 Cargar Todos los Hospitales
+                                </button>
+                            </div>
+                            <div style="font-size: 11px; color: #6b7280; margin-top: 8px; line-height: 1.3;">
+                                Los filtros se combinan entre sí (ISP + CCAA + Provincia).<br>
+                                Deja un filtro en "Todos" para no aplicarlo.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="import-card">
+                        <h4>🧮 Parámetros de Cálculo (Opcional)</h4>
+                        <div class="form-group">
+                            <label>Archivo "Excel Herramienta Impacto 1.xlsx" (opcional - para personalizar parámetros)</label>
+                            <input accept=".xlsx,.xls" class="form-input" id="fileInputParametros" onchange="importarParametros()" type="file"/>
+                        </div>
+                        <div class="status-indicator status-warning" id="statusParametros" style="display: none;">
+                            <span>⏳</span> Pendiente de importar
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="section">
+            <h2>🏥 Hospitales del Territorio</h2>
+            
+            <div id="leyendaHospitales" style="background: white; border: 1px solid #e0e6ed; border-radius: 8px; padding: 12px; margin-bottom: 20px; font-size: 12px; display: none;">
+            </div>
+            
+            <div class="controls">
+                <button class="btn" disabled="" id="btnCalcular" onclick="calcularTodosImpactos()">🔄 Calcular Impactos</button>
+                <button class="btn btn-secondary" disabled="" id="btnResetear" onclick="resetearCalculos()">🔄 Resetear Cálculos</button>
+                <button class="btn" disabled="" id="btnFusionar" onclick="iniciarFusionHospitales()" style="background: var(--ray-flower); color: var(--future-dusk);">🔗 Fusionar Hospitales</button>
+                <button class="btn btn-success" disabled="" id="btnImportar" onclick="importarJSON()">📥 Importar JSON</button>
+                <button class="btn btn-success" disabled="" id="btnExportar" onclick="exportarResultados()">💾 Exportar JSON</button>
+                <button class="btn btn-success" disabled="" id="btnExportarHTML" onclick="exportarResumenHTML()">📄 Exportar Resúmenes HTML</button>
+                <input type="file" id="fileInputJSON" accept=".json" style="display: none;" onchange="procesarArchivoJSON()">
+            </div>
+            <table class="hospital-table">
+                <thead>
+                <tr>
+                    <th><input type="checkbox" id="selectAllHospitals" onchange="toggleSelectAllHospitals()"></th>
+                    <th>Fusionar
+                        <div style="font-size: 10px; font-weight: normal; opacity: 0.9;">
+                            Marca 2 para fusionar
+                        </div>
+                    </th>
+                    <th>Código</th>
+                    <th>Hospital</th>
+                    <th>Provincia</th> 
+                    <th>ISP</th>
+                    <th>Población</th>
+                    <th>Cobertura AP (%)
+                        <div style="font-size: 10px; font-weight: normal; opacity: 0.9;">
+                            Solo para HS-Connect-AP y EspANDE
+                        </div>
+                    </th> 
+                    <th>Proyectos Asignados</th>
+                    <th>Estado Cálculo</th>
+                </tr>
+                </thead>
+                <tbody id="hospitalTableBody">
+                <tr>
+                    <td class="empty-state" colspan="10"> Importa la base de datos para cargar hospitales
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section" id="resumenProyectosSection" style="display: none;">
+            <div class="collapsible-header" id="headerResumenPorProyecto" onclick="toggleCollapsible('resumenPorProyectoContent', 'iconResumenPorProyecto')">
+                <h3>🎯 Resumen de Impacto - Por Proyecto</h3>
+                <span class="collapsible-icon" id="iconResumenPorProyecto">▶</span>
+            </div>
+            <div class="collapsible-content" id="resumenPorProyectoContent">
+                <div class="summary-section">
+                    <h3 style="margin-bottom: 20px; text-align: center;">📌 Resumen General de Proyectos</h3>
+                    <div class="summary-row-centered">
+                        <div class="stat-card-impacto">
+                            <div class="stat-number" id="totalHospitalesISP">0</div>
+                            <div class="stat-label">Hospitales Territorio</div>
+                        </div>
+                        <div class="stat-card-impacto">
+                            <div class="stat-number" id="totalPoblacionISP">0</div>
+                            <div class="stat-label">Población Total</div>
+                        </div>
+                    </div>
+                    <div id="resumenProyectosContainer"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="resumenHospitalesSection" style="display: none;">
+            <div class="collapsible-header" id="headerResumenPorHospital" onclick="toggleCollapsible('resumenPorHospitalContent', 'iconResumenPorHospital')">
+                <h3>🏥 Resumen de Impacto - Por Hospital</h3>
+                <span class="collapsible-icon" id="iconResumenPorHospital">▶</span>
+            </div>
+            <div class="collapsible-content" id="resumenPorHospitalContent">
+                <div class="summary-section">
+                    <div id="hospitalesPorProyectoContainer" class="resumen-impacto-grid"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="resumenTotalImpacto" style="display: none;">
+            <div class="summary-section">
+                <h3 style="margin-bottom: 20px; text-align: center;">📌 Resumen Consolidado de Impacto (Territorio Seleccionado)</h3>
+                
+                <div class="summary-row-centered">
+                    <div class="stat-card-impacto">
+                        <div class="stat-number" id="totalHospitalesConsolidado">0</div>
+                        <div class="stat-label">Hospitales Territorio</div>
+                    </div>
+                    <div class="stat-card-impacto">
+                        <div class="stat-number" id="totalPoblacionConsolidado">0</div>
+                        <div class="stat-label">Población Total</div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 30px;">
+                    
+                    <div class="therapeutic-area-section reuma-section" style="margin-bottom: 20px;">
+                        <div class="therapeutic-area-header">
+                            <h4>REUMA (TEÓRICO-SIM)</h4>
+                        </div>
+                        
+                        <div style="display: flex; gap: 20px; align-items: stretch;">
+                            <div class="intervention-group expansion-group" style="flex: 1;">
+                                <div class="intervention-header">EXPANSIÓN Dx</div>
+                                <div class="project-grid">
+                                    <div class="project-card">
+                                        <div class="project-label">Nº Proy EspANDE</div>
+                                        <div class="project-count" id="hospEspANDE">0</div>
+                                    </div>
+                                </div>
+                                <div class="metric-card metric-primary">
+                                    <div class="metric-value" id="totalDiagnosticosReuma">0</div>
+                                    <div class="metric-label">Nuevos Pac Dx Reuma</div>
+                                </div>
+                            </div>
+                            
+                            <div class="intervention-group switch-group" style="flex: 2;">
+                                <div class="intervention-header">Acelerar Switch</div>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                    <div class="project-grid">
+                                        <div class="project-card">
+                                            <div class="project-label">Nº PROMueve EspA</div>
+                                            <div class="project-count" id="hospPROMueveEspA">0</div>
+                                        </div>
+                                        <div class="metric-card">
+                                            <div class="metric-value" id="totalSwitchEspA">0</div>
+                                            <div class="metric-label">Switch Pacientes EspA</div>
+                                        </div>
+                                    </div>
+                                    <div class="project-grid">
+                                        <div class="project-card">
+                                            <div class="project-label">Nº PROMueve APs</div>
+                                            <div class="project-count" id="hospPROMueveAPs">0</div>
+                                        </div>
+                                        <div class="metric-card">
+                                            <div class="metric-value" id="totalSwitchAPs">0</div>
+                                            <div class="metric-label">Switch Pacientes APs</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="metric-card metric-summary">
+                                    <div class="metric-value" id="totalSwitchReuma">0</div>
+                                    <div class="metric-label">Total Switch Pacientes Reuma</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="therapeutic-area-section hs-section">
+                        <div class="therapeutic-area-header">
+                            <h4>HS (TEÓRICO-SIM)</h4>
+                        </div>
+                        
+                        <div style="display: flex; gap: 20px; align-items: stretch;">
+                            <div class="intervention-group expansion-group" style="flex: 1;">
+                                <div class="intervention-header">EXPANSIÓN Dx</div>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                    <div class="project-grid">
+                                        <div class="project-card">
+                                            <div class="project-label">Nº Proy Connect-AP</div>
+                                            <div class="project-count" id="hospHSConnectAP">0</div>
+                                        </div>
+                                        <div class="metric-card">
+                                            <div class="metric-value" id="pacientesHSConnectAP">0</div>
+                                            <div class="metric-label">Nuevos Pac Dx HS - AP</div>
+                                        </div>
+                                    </div>
+                                    <div class="project-grid">
+                                        <div class="project-card">
+                                            <div class="project-label">Nº Proy Connect Intra</div>
+                                            <div class="project-count" id="hospHSConnectIntra">0</div>
+                                        </div>
+                                        <div class="metric-card">
+                                            <div class="metric-value" id="pacientesHSConnectIntra">0</div>
+                                            <div class="metric-label">Nuevos Pac Dx HS - Intra</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="metric-card metric-summary">
+                                    <div class="metric-value" id="totalDiagnosticosHS">0</div>
+                                    <div class="metric-label">Total Nuevos Pac Dx HS</div>
+                                </div>
+                            </div>
+                            
+                            <div class="intervention-group capacity-group" style="flex: 1;">
+                                <div class="intervention-header">Capacidad</div>
+                                <div class="project-grid">
+                                    <div class="project-card">
+                                        <div class="project-label">Nº Proy Efficiency</div>
+                                        <div class="project-count" id="hospHSEfficiency">0</div>
+                                    </div>
+                                </div>
+                                <div class="metric-card metric-primary">
+                                    <div class="metric-value" id="totalCapacidadHS">0</div>
+                                    <div class="metric-label">Incremento Pacientes Tratados HS</div>
+                                </div>
+                            </div>
+                            
+                            <div class="intervention-group switch-group" style="flex: 1;">
+                                <div class="intervention-header">Acelerar Switch</div>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                    <div class="project-grid">
+                                        <div class="project-card">
+                                            <div class="project-label">Nº PROMueve Derma</div>
+                                            <div class="project-count" id="hospHSPROMueveDerma">0</div>
+                                        </div>
+                                        <div class="metric-card">
+                                            <div class="metric-value" id="switchHSDerma">0</div>
+                                            <div class="metric-label">Switch Pac HS-Derma</div>
+                                        </div>
+                                    </div>
+                                    <div class="project-grid">
+                                        <div class="project-card">
+                                            <div class="project-label">Nº PROMueve FH</div>
+                                            <div class="project-count" id="hospHSPROMueveFH">0</div>
+                                        </div>
+                                        <div class="metric-card">
+                                            <div class="metric-value" id="switchHSFH">0</div>
+                                            <div class="metric-label">Switch Pac HS-FH</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="metric-card metric-summary">
+                                    <div class="metric-value" id="totalSwitchHS">0</div>
+                                    <div class="metric-label">Total Switch Pacientes HS</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin-top: 40px; text-align: center; font-size: 13px; color: #64748b; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <p style="margin: 0; font-weight: 600;">📋 Esta herramienta ha sido creada por <strong style="color: var(--future-dusk);">Silvia Márquez</strong>, todos los derechos reservados.</p>
+        </div>
+
+    </div>
+</div>
+
+<div class="modal-overlay" id="projectModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title" id="modalTitle">Detalles del Proyecto</h2>
+            <button class="modal-close" onclick="cerrarModal()">×</button>
+        </div>
+        <div class="modal-body" id="modalBody">
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="fusionModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">🔗 Fusionar Hospitales</h2>
+            <button class="modal-close" onclick="cerrarModalFusion()">×</button>
+        </div>
+        <div class="modal-body" id="fusionModalBody">
+            <div class="impact-card">
+                <h4>⚠️ Confirmar Fusión de Hospitales</h4>
+                <p style="color: #6b7280; margin-bottom: 20px;">
+                    Vas a fusionar los siguientes hospitales en uno solo. Esta acción no se puede deshacer.
+                </p>
+                
+                <div id="hospitalesFusionInfo"></div>
+                
+                <div style="margin: 20px 0; padding: 15px; background: #f0f9ff; border-radius: 8px; border-left: 4px solid var(--aquatic-awe);">
+                    <h4 style="margin: 0 0 10px 0; color: var(--future-dusk);">📋 Datos del Hospital Fusionado:</h4>
+                    <div class="form-group">
+                        <label>Nombre del nuevo hospital:</label>
+                        <input type="text" id="nombreHospitalFusionado" class="form-input" placeholder="Ej: Hospital A + Hospital B">
+                    </div>
+                    <div class="form-group">
+                        <label>Código del nuevo hospital:</label>
+                        <input type="text" id="codigoHospitalFusionado" class="form-input" placeholder="Ej: HAB">
+                    </div>
+                    <div class="form-group">
+                        <label>Cobertura AP (%) - mismo porcentaje para ambos:</label>
+                        <input type="number" step="0.01" min="0" max="100" id="coberturaAPFusionado" class="form-input" placeholder="Ej: 50.00">
+                    </div>
+                    <div class="impact-metric">
+                        <span class="impact-metric-label">Población total sumada:</span>
+                        <span class="impact-metric-value" id="poblacionTotalFusion">0</span>
+                    </div>
+                    <div class="impact-metric">
+                        <span class="impact-metric-label">Proyectos combinados:</span>
+                        <span class="impact-metric-value" id="proyectosFusionados">0</span>
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                    <button class="btn btn-secondary" onclick="cerrarModalFusion()">❌ Cancelar</button>
+                    <button class="btn btn-success" onclick="ejecutarFusionHospitales()">✅ Fusionar Hospitales</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+// DATOS GLOBALES
+let hospitales = [];
+let hospitalIdCounter = 1;
+let baseDatosImportada = [];
+let parametrosCargados = false;
+let hospitalesCargados = false;
+let territorioActual = '';
+let hospitalesParaFusionar = []; // Array para almacenar IDs de hospitales marcados para fusión
+let hospitalesCompletos = []; // Variable global para mantener copia completa de hospitales
+
+// Variables para colores dinámicos
+let ispColors = {};
+let ccaaColors = {};
+const COLOR_PALETTE_ISP = ['#FF6F61', '#FFD23F', '#3EB7B3', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#06b6d4', '#ec4899', '#84cc16', '#14b8a6', '#f97316'];
+const COLOR_PALETTE_CCAA = ['#f0fdf4', '#eff6ff', '#fefce8', '#fef2f2', '#f0f9ff', '#faf5ff', '#fffbeb', '#f0fdfa', '#fce7f3', '#fff1f2', '#f8fafc', '#f3e8ff'];
+
+// Definición de proyectos con nombres exactos del Excel - COLORES CORREGIDOS
+const proyectos = {
+    "HS-Connect-AP ": {
+        nombre: "HS-Connect-AP",
+        color: "#3b82f6",
+        descripcion: "Proyecto de conexión ambulatoria para HS",
+        area: "HS",
+        parametros: {}
+    },
+    "HS-Connect Intra": {
+        nombre: "HS-Connect-Intra",
+        color: "#06b6d4", // CAMBIADO de #8b5cf6 a #06b6d4 (cian)
+        descripcion: "Proyecto de conexión intrahospitalaria para HS",
+        area: "HS",
+        parametros: {}
+    },
+    "HS-Efficiency": {
+        nombre: "HS-Efficiency",
+        color: "#10b981",
+        descripcion: "Proyecto de eficiencia en tratamiento de HS",
+        area: "HS",
+        parametros: {}
+    },
+    "HS-PROMueve-Derma": {
+        nombre: "HS-PROMueve-Derma",
+        color: "#f59e0b",
+        descripcion: "Proyecto PROMueve Dermatología para HS",
+        area: "HS",
+        parametros: {}
+    },
+    "HS-PROMUEVE-FH": {
+        nombre: "HS-PROMueve-FH",
+        color: "#ef4444",
+        descripcion: "Proyecto PROMueve Farmacia Hospitalaria para HS",
+        area: "HS",
+        parametros: {}
+    },
+    "PROMUEVE EspA": {
+        nombre: "PROMueve-EspA",
+        color: "#06b6d4",
+        descripcion: "Proyecto PROMueve Espondiloartritis Axial",
+        area: "Reuma",
+        parametros: {}
+    },
+    "PROMueve APs": {
+        nombre: "PROMueve-APs",
+        color: "#ec4899", // CAMBIADO de #8b5cf6 a #ec4899 (rosa)
+        descripcion: "Proyecto PROMueve Artritis Psoriásica",
+        area: "Reuma",
+        parametros: {}
+    },
+    "EspANDE ": {
+        nombre: "EspANDE",
+        color: "#84cc16",
+        descripcion: "Proyecto Espande para expansión diagnóstica",
+        area: "Reuma",
+        parametros: {}
+    }
+};
+
+// FUNCIONES DE IMPORTACIÓN
+function importarHospitales() {
+    const fileInput = document.getElementById('fileInputHospitales');
+    const file = fileInput.files[0];
+
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+
+            const sheetName = workbook.SheetNames.find(name =>
+                name.toLowerCase().includes('asignación') ||
+                name.toLowerCase().includes('asignacion') ||
+                name === 'Asignación'
+            );
+
+            if (!sheetName) {
+                throw new Error('No se encontró la hoja "Asignación"');
+            }
+
+            const worksheet = workbook.Sheets[sheetName];
+            const range = XLSX.utils.decode_range(worksheet['!ref'] || 'A1:A1');
+
+            baseDatosImportada = [];
+            let totalHospitales = 0;
+            const ispsEncontrados = {};
+
+            for (let row = 1; row <= range.e.r; row++) {
+                const codigo = worksheet[XLSX.utils.encode_cell({r: row, c: 0})]?.v;
+                const nombre = worksheet[XLSX.utils.encode_cell({r: row, c: 3})]?.v;
+                const ca = worksheet[XLSX.utils.encode_cell({r: row, c: 4})]?.v;
+                const provincia = worksheet[XLSX.utils.encode_cell({r: row, c: 5})]?.v;
+                const poblacion = worksheet[XLSX.utils.encode_cell({r: row, c: 6})]?.v;
+                const ispName = worksheet[XLSX.utils.encode_cell({r: row, c: 10})]?.v;
+
+                if (nombre && poblacion !== undefined && codigo && ca && provincia && ispName) {
+                    const ispStr = ispName.toString().trim();
+                    
+                    const hospital = {
+                        codigo: codigo.toString(),
+                        nombre: nombre.toString().trim(),
+                        ca: ca.toString().trim(),
+                        provincia: provincia.toString().trim(),
+                        poblacion: typeof poblacion === 'number' ? poblacion : 0,
+                        isp: ispStr
+                    };
+
+                    baseDatosImportada.push(hospital);
+                    totalHospitales++;
+                    ispsEncontrados[ispStr] = (ispsEncontrados[ispStr] || 0) + 1;
+                }
+            }
+
+            hospitalesCargados = true;
+            document.getElementById('statusHospitales').style.display = 'block';
+            document.getElementById('statusHospitales').className = 'status-indicator status-success';
+            
+            let statusMessage = `<span>✅</span> ${totalHospitales} hospitales encontrados`;
+            const ispList = Object.entries(ispsEncontrados).map(([isp, count]) => `${isp}: ${count}`).join(', ');
+            if (ispList) statusMessage += `<br><small>${ispList}</small>`;
+            
+            document.getElementById('statusHospitales').innerHTML = statusMessage;
+
+            // Poblar selectores dinámicos
+            poblarSelectores();
+            document.getElementById('btnCargarSeleccion').disabled = false;
+            document.getElementById('btnCargarTodos').disabled = false;
+            document.getElementById('filtrosContainer').style.display = 'block';
+
+            console.log(`✅ ${totalHospitales} hospitales cargados desde Excel. ISPs:`, ispsEncontrados);
+
+        } catch (error) {
+            console.error('Error:', error);
+            document.getElementById('statusHospitales').style.display = 'block';
+            document.getElementById('statusHospitales').className = 'status-indicator status-error';
+            document.getElementById('statusHospitales').innerHTML = `<span>❌</span> Error: ${error.message}`;
+        }
+    };
+    reader.readAsArrayBuffer(file);
+}
+
+function importarParametros() {
+    const fileInput = document.getElementById('fileInputParametros');
+    const file = fileInput.files[0];
+
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+
+            let parametrosActualizados = 0;
+
+            Object.keys(proyectos).forEach(proyectoId => {
+                const worksheet = workbook.Sheets[proyectoId];
+
+                if (worksheet) {
+                    const parametrosExtraidos = extraerParametrosDeHoja(worksheet);
+                    if (Object.keys(parametrosExtraidos).length > 0) {
+                        proyectos[proyectoId].parametros = parametrosExtraidos;
+                        parametrosActualizados++;
+                    }
+                }
+            });
+
+            parametrosCargados = true;
+            document.getElementById('statusParametros').style.display = 'block';
+            document.getElementById('statusParametros').className = 'status-indicator status-success';
+            document.getElementById('statusParametros').innerHTML = `<span>✅</span> ${parametrosActualizados} proyectos configurados`;
+
+            console.log(`✅ Parámetros cargados para ${parametrosActualizados} proyectos`);
+
+        } catch (error) {
+            console.error('Error:', error);
+            document.getElementById('statusParametros').style.display = 'block';
+            document.getElementById('statusParametros').className = 'status-indicator status-error';
+            document.getElementById('statusParametros').innerHTML = `<span>❌</span> Error al cargar parámetros`;
+        }
+    };
+    reader.readAsArrayBuffer(file);
+}
+
+function extraerParametrosDeHoja(worksheet) {
+    const range = XLSX.utils.decode_range(worksheet['!ref'] || 'A1:A1');
+    const parametros = {};
+
+    for (let row = 0; row <= range.e.r; row++) {
+        const cellB = worksheet[XLSX.utils.encode_cell({r: row, c: 1})];
+        const cellC = worksheet[XLSX.utils.encode_cell({r: row, c: 2})];
+
+        if (cellB && cellB.v && typeof cellB.v === 'string' && cellC && typeof cellC.v === 'number') {
+            const label = cellB.v.toLowerCase().trim();
+            const value = cellC.v;
+
+            if (label.includes('prevalencia hs') || label.includes('prevalencia')) {
+                parametros.prevalencia = value;
+            } else if (label.includes('ratio diagnóstico') || label.includes('tasa diagnostica')) {
+                parametros.tasaDiagnostica = value;
+            } else if (label.includes('tasa de tratamiento') || label.includes('tasa tratamiento')) {
+                parametros.tasaTratamiento = value;
+            } else if (label.includes('impacto del hsconnect-ap') || label.includes('impacto') && label.includes('40%')) {
+                parametros.impactoRatio = value;
+            } else if (label.includes('diagnóstico intrahospitalario')) {
+                parametros.diagnosticosIntra = value;
+            } else if (label.includes('incremento') && label.includes('tasa')) {
+                parametros.incrementoTasa = value;
+            } else if (label.includes('incremento') && label.includes('20%')) {
+                parametros.incrementoTratamiento = value;
+            } else if (label.includes('pacientes dinámicos')) {
+                parametros.pacientesDinamicos = value;
+            } else if (label.includes('mercado dinámico')) {
+                parametros.mercadoDinamico = value;
+            } else if (label.includes('incremento') && label.includes('share')) {
+                parametros.incrementoShare = value;
+            }
+        }
+    }
+
+    return parametros;
+}
+
+// ===== NUEVAS FUNCIONES PARA SELECCIÓN NACIONAL DINÁMICA =====
+
+function poblarSelectores() {
+    if (!baseDatosImportada.length) return;
+
+    const ispSet = [...new Set(baseDatosImportada.map(h => h.isp))].sort();
+    const ccaaSet = [...new Set(baseDatosImportada.map(h => h.ca))].sort();
+    const provinciaSet = [...new Set(baseDatosImportada.map(h => h.provincia))].sort();
+
+    // Asignar colores dinámicos a ISPs
+    ispColors = {};
+    ispSet.forEach((isp, i) => {
+        ispColors[isp] = COLOR_PALETTE_ISP[i % COLOR_PALETTE_ISP.length];
+    });
+
+    // Asignar colores dinámicos a CCAA
+    ccaaColors = {};
+    ccaaSet.forEach((ca, i) => {
+        ccaaColors[ca] = COLOR_PALETTE_CCAA[i % COLOR_PALETTE_CCAA.length];
+    });
+
+    // Poblar selector ISP
+    const ispSelect = document.getElementById('filtroISP');
+    ispSelect.innerHTML = '<option value="">Todos los ISP</option>';
+    ispSet.forEach(isp => {
+        ispSelect.innerHTML += `<option value="${isp.replace(/"/g, '&quot;')}">${isp}</option>`;
+    });
+
+    // Poblar selector CCAA
+    const ccaaSelect = document.getElementById('filtroCCAA');
+    ccaaSelect.innerHTML = '<option value="">Todas las CCAA</option>';
+    ccaaSet.forEach(ca => {
+        ccaaSelect.innerHTML += `<option value="${ca.replace(/"/g, '&quot;')}">${ca}</option>`;
+    });
+
+    // Poblar selector Provincia
+    const provinciaSelect = document.getElementById('filtroProvincia');
+    provinciaSelect.innerHTML = '<option value="">Todas las provincias</option>';
+    provinciaSet.forEach(prov => {
+        provinciaSelect.innerHTML += `<option value="${prov.replace(/"/g, '&quot;')}">${prov}</option>`;
+    });
+}
+
+function cargarSeleccionDinamica() {
+    if (!hospitalesCargados || baseDatosImportada.length === 0) {
+        alert('Primero debes importar la base de datos de hospitales.');
+        return;
+    }
+
+    const selectedISP = document.getElementById('filtroISP').value;
+    const selectedCCAA = document.getElementById('filtroCCAA').value;
+    const selectedProvincia = document.getElementById('filtroProvincia').value;
+
+    if (!selectedISP && !selectedCCAA && !selectedProvincia) {
+        alert('Selecciona al menos un filtro (ISP, CCAA o Provincia), o usa "Cargar Todos los Hospitales".');
+        return;
+    }
+
+    let filtered = baseDatosImportada;
+    if (selectedISP) filtered = filtered.filter(h => h.isp === selectedISP);
+    if (selectedCCAA) filtered = filtered.filter(h => h.ca === selectedCCAA);
+    if (selectedProvincia) filtered = filtered.filter(h => h.provincia === selectedProvincia);
+
+    if (filtered.length === 0) {
+        alert('No se encontraron hospitales con la combinación de filtros seleccionada.');
+        return;
+    }
+
+    // Construir descripción del territorio
+    let descParts = [];
+    if (selectedISP) descParts.push(`ISP: ${selectedISP}`);
+    if (selectedCCAA) descParts.push(`CCAA: ${selectedCCAA}`);
+    if (selectedProvincia) descParts.push(`Prov: ${selectedProvincia}`);
+    territorioActual = descParts.join(' | ');
+
+    // Crear array de hospitales
+    hospitales = [];
+    filtered.forEach(hospitalOriginal => {
+        const hospital = {
+            id: hospitalIdCounter++,
+            codigo: hospitalOriginal.codigo,
+            nombre: hospitalOriginal.nombre,
+            provincia: hospitalOriginal.provincia,
+            ca: hospitalOriginal.ca,
+            poblacion: hospitalOriginal.poblacion,
+            coberturaAP: 0,
+            isp: hospitalOriginal.isp,
+            proyectos: [],
+            impactos: {},
+            seleccionado: true
+        };
+        hospitales.push(hospital);
+    });
+
+    hospitalesCompletos = [...hospitales];
+
+    actualizarTablaHospitales();
+    actualizarTitulosTerritorio();
+    actualizarResumenes();
+    habilitarControles();
+
+    const hospitalesPorISP = {};
+    hospitales.forEach(h => {
+        if (!hospitalesPorISP[h.isp]) hospitalesPorISP[h.isp] = 0;
+        hospitalesPorISP[h.isp]++;
+    });
+    let desglose = Object.entries(hospitalesPorISP).map(([isp, count]) => `${isp}: ${count}`).join('\n');
+
+    alert(`✅ Selección cargada correctamente.\n🏥 ${hospitales.length} hospitales encontrados.\n📍 ${territorioActual}\n\nDesglose por ISP:\n${desglose}`);
+}
+
+function cargarTodosHospitales() {
+    if (!hospitalesCargados || baseDatosImportada.length === 0) {
+        alert('Primero debes importar la base de datos de hospitales.');
+        return;
+    }
+
+    hospitales = [];
+    territorioActual = 'Todos los hospitales (Nacional)';
+
+    baseDatosImportada.forEach(hospitalOriginal => {
+        const hospital = {
+            id: hospitalIdCounter++,
+            codigo: hospitalOriginal.codigo,
+            nombre: hospitalOriginal.nombre,
+            provincia: hospitalOriginal.provincia,
+            ca: hospitalOriginal.ca,
+            poblacion: hospitalOriginal.poblacion,
+            coberturaAP: 0,
+            isp: hospitalOriginal.isp,
+            proyectos: [],
+            impactos: {},
+            seleccionado: true
+        };
+        hospitales.push(hospital);
+    });
+
+    hospitalesCompletos = [...hospitales];
+
+    actualizarTablaHospitales();
+    actualizarTitulosTerritorio();
+    actualizarResumenes();
+    habilitarControles();
+
+    const hospitalesPorISP = {};
+    hospitales.forEach(h => {
+        if (!hospitalesPorISP[h.isp]) hospitalesPorISP[h.isp] = 0;
+        hospitalesPorISP[h.isp]++;
+    });
+
+    let desglose = Object.entries(hospitalesPorISP).map(([isp, count]) => `${isp}: ${count}`).join('\n');
+
+    alert(`✅ Todos los hospitales cargados.\n🏥 ${hospitales.length} hospitales totales.\n📍 Ámbito: Nacional\n\nDesglose por ISP:\n${desglose}`);
+}
+
+function actualizarTitulosTerritorio() {
+    const headerTitle = document.querySelector('.header h1');
+    if (territorioActual) {
+        headerTitle.innerHTML = `🏥 ${territorioActual}`;
+    } else {
+        headerTitle.innerHTML = '🏥 Herramienta HIS Inmuno';
+    }
+
+    const subtitle = document.querySelector('.subtitle');
+    if (territorioActual) {
+        subtitle.textContent = `Herramienta de Impacto HIS Inmuno - Análisis Nacional (${territorioActual})`;
+    } else {
+        subtitle.textContent = 'Herramienta de Impacto HIS Inmuno - Análisis de Proyectos';
+    }
+
+    const resumenTotalTitle = document.querySelector('#resumenTotalImpacto .summary-section h3');
+    if (resumenTotalTitle && territorioActual) {
+        resumenTotalTitle.textContent = `📌 Resumen Consolidado de Impacto (${territorioActual})`;
+    }
+}
+
+function habilitarControles() {
+    document.getElementById('btnCalcular').disabled = false;
+    document.getElementById('btnResetear').disabled = false;
+    document.getElementById('btnFusionar').disabled = false;
+    document.getElementById('btnImportar').disabled = false;
+    document.getElementById('btnExportar').disabled = false;
+    document.getElementById('btnExportarHTML').disabled = false;
+}
+
+// FUNCIONES DE GESTIÓN DE PROYECTOS
+function agregarProyecto(hospitalId, proyectoId) {
+    if (!proyectoId) return;
+
+    const hospital = hospitales.find(h => h.id === hospitalId);
+    if (!hospital) return;
+
+    if (hospital.proyectos.includes(proyectoId)) {
+        alert(`El hospital "${hospital.nombre}" ya tiene asignado este proyecto.`);
+        document.getElementById(`add-proyecto-select-${hospitalId}`).value = "";
+        return;
+    }
+
+    if ((proyectoId === 'HS-Connect-AP ' || proyectoId === 'EspANDE ') && hospital.coberturaAP === 0) {
+        const projectName = proyectos[proyectoId].nombre;
+        const confirm = window.confirm(
+            `⚠️ ATENCIÓN: El proyecto "${projectName}" requiere definir la Cobertura AP.\n\n` +
+            `Actualmente está en 0% para "${hospital.nombre}".\n\n` +
+            `¿Quieres continuar? Recuerda rellenar la Cobertura AP antes de calcular impactos.`
+        );
+        
+        if (!confirm) {
+            document.getElementById(`add-proyecto-select-${hospitalId}`).value = "";
+            return;
+        }
+        
+        const coberturaInput = document.getElementById(`cobertura-ap-${hospitalId}`);
+        if (coberturaInput) {
+            coberturaInput.style.border = '2px solid #f59e0b';
+            coberturaInput.style.backgroundColor = '#fef3c7';
+            setTimeout(() => {
+                coberturaInput.style.border = '1px solid #d1d5db';
+                coberturaInput.style.backgroundColor = 'white';
+            }, 3000);
+        }
+    }
+
+    hospital.proyectos.push(proyectoId);
+    actualizarColumnaProyectos(hospitalId);
+}
+
+function eliminarProyecto(hospitalId, proyectoId) {
+    const hospital = hospitales.find(h => h.id === hospitalId);
+    if (!hospital) return;
+
+    const projectIndex = hospital.proyectos.indexOf(proyectoId);
+    if (projectIndex > -1) {
+        hospital.proyectos.splice(projectIndex, 1);
+        if (hospital.impactos && hospital.impactos[proyectoId]) {
+            delete hospital.impactos[proyectoId];
+        }
+        actualizarColumnaProyectos(hospitalId);
+    }
+}
+
+function actualizarColumnaProyectos(hospitalId) {
+    const cell = document.getElementById(`proyectos-cell-${hospitalId}`);
+    const hospital = hospitales.find(h => h.id === hospitalId);
+    if (!cell || !hospital) return;
+
+    let tagsHtml = '<div>';
+    if (hospital.proyectos && hospital.proyectos.length > 0) {
+        hospital.proyectos.forEach(proyectoId => {
+            const proyecto = proyectos[proyectoId];
+            if (proyecto) {
+                tagsHtml += `<span class="proyecto-tag" style="background: ${proyecto.color};">
+                                ${proyecto.nombre}
+                                <span class="remove-proyecto-btn" onclick="eliminarProyecto(${hospitalId}, '${proyectoId}')">×</span>
+                             </span> `;
+            }
+        });
+    } else {
+        tagsHtml += '<span style="color: #999; font-size: 11px;">Sin proyectos</span>';
+    }
+    tagsHtml += '</div>';
+
+    let selectHtml = `<select id="add-proyecto-select-${hospitalId}" class="add-proyecto-select" onchange="agregarProyecto(${hospitalId}, this.value)">
+                        <option value="">-- Añadir proyecto --</option>`;
+    Object.keys(proyectos).forEach(proyectoId => {
+        selectHtml += `<option value="${proyectoId}">${proyectos[proyectoId].nombre}</option>`;
+    });
+    selectHtml += `</select>`;
+
+    cell.innerHTML = tagsHtml + selectHtml;
+}
+
+function updateCoberturaAP(hospitalId, value) {
+    const hospital = hospitales.find(h => h.id === hospitalId);
+    if (hospital) {
+        let parsedValue = parseFloat(value);
+        if (isNaN(parsedValue)) parsedValue = 0;
+        if (parsedValue > 100) {
+            parsedValue = 100;
+            alert('La cobertura AP no puede ser mayor al 100%');
+        }
+        if (parsedValue < 0) parsedValue = 0;
+        
+        hospital.coberturaAP = parsedValue / 100;
+        
+        document.getElementById(`cobertura-ap-${hospitalId}`).value = parsedValue.toFixed(2);
+    }
+}
+
+// FUNCIONES DE SELECCIÓN DE HOSPITALES
+function toggleHospitalSelection(hospitalId) {
+    const hospital = hospitales.find(h => h.id === hospitalId);
+    if (hospital) {
+        hospital.seleccionado = !hospital.seleccionado;
+        actualizarTablaHospitales();
+        actualizarResumenes();
+    }
+}
+
+function toggleSelectAllHospitals() {
+    const selectAllCheckbox = document.getElementById('selectAllHospitals');
+    const isChecked = selectAllCheckbox.checked;
+
+    hospitales.forEach(hospital => {
+        hospital.seleccionado = isChecked;
+    });
+    actualizarTablaHospitales();
+    actualizarResumenes();
+}
+
+// FUNCIONES DE CÁLCULO
+function calcularTodosImpactos() {
+    if (hospitales.length === 0) {
+        alert('No hay hospitales cargados.');
+        return;
+    }
+
+    const hospitalesConProblemasCobertura = [];
+    hospitales.forEach(hospital => {
+        if (hospital.proyectos && hospital.coberturaAP === 0) {
+            const tieneProyectosCobertura = hospital.proyectos.some(p => 
+                p === 'HS-Connect-AP ' || p === 'EspANDE '
+            );
+            if (tieneProyectosCobertura) {
+                hospitalesConProblemasCobertura.push(hospital);
+            }
+        }
+    });
+
+    if (hospitalesConProblemasCobertura.length > 0) {
+        const listaHospitales = hospitalesConProblemasCobertura.map(h => h.nombre).join('\n• ');
+        const continuar = confirm(
+            `⚠️ ATENCIÓN: Los siguientes hospitales tienen proyectos que requieren Cobertura AP pero está en 0%:\n\n• ${listaHospitales}\n\n` +
+            `Los cálculos para HS-Connect-AP y EspANDE darán resultado 0.\n\n¿Continuar de todas formas?`
+        );
+        if (!continuar) return;
+    }
+
+    if (!parametrosCargados) {
+        console.log('ℹ️ Usando parámetros por defecto para los cálculos');
+    }
+
+    let totalCalculos = 0;
+
+    hospitales.forEach(hospital => {
+        hospital.impactos = {};
+
+        if (hospital.proyectos && hospital.proyectos.length > 0) {
+            hospital.proyectos.forEach(proyectoId => {
+                hospital.impactos[proyectoId] = calcularImpactoProyecto(hospital, proyectoId);
+                totalCalculos++;
+            });
+        }
+    });
+
+    if (totalCalculos === 0) {
+        alert('No hay proyectos asignados para calcular.');
+        return;
+    }
+
+    actualizarTablaHospitales();
+    actualizarResumenes();
+    
+    const mensaje = parametrosCargados ? 
+        `✅ Cálculos completados para ${totalCalculos} asignaciones usando parámetros personalizados.` :
+        `✅ Cálculos completados para ${totalCalculos} asignaciones usando parámetros por defecto.`;
+    alert(mensaje);
+}
+
+function calcularImpactoProyecto(hospital, proyectoId) {
+    const proyecto = proyectos[proyectoId];
+    const poblacion = hospital.poblacion || 0;
+    const coberturaAPHospital = hospital.coberturaAP !== undefined ? hospital.coberturaAP : 0;
+
+    switch(proyectoId) {
+        case 'HS-Connect-AP ':
+            return calcularHSConnectAP(poblacion, coberturaAPHospital, proyecto.parametros);
+        case 'HS-Connect Intra':
+            return calcularHSConnectIntra(poblacion, proyecto.parametros);
+        case 'HS-Efficiency':
+            return calcularHSEfficiency(poblacion, proyecto.parametros);
+        case 'HS-PROMueve-Derma':
+            return calcularHSPROMueveDerma(poblacion, proyecto.parametros);
+        case 'HS-PROMUEVE-FH':
+            return calcularHSPROMueveFH(poblacion, proyecto.parametros);
+        case 'PROMUEVE EspA':
+            return calcularPROMueveEspA(poblacion, proyecto.parametros);
+        case 'PROMueve APs':
+            return calcularPROMueveAPs(poblacion, proyecto.parametros);
+        case 'EspANDE ':
+            return calcularEspANDE(poblacion, coberturaAPHospital, proyecto.parametros);
+        default:
+            return { error: 'Proyecto no reconocido' };
+    }
+}
+
+// Cálculos específicos
+function calcularHSConnectAP(poblacion, coberturaAP, params) {
+    const prevalencia = params.prevalencia || 0.005;
+    const tasaDiagnostica = params.tasaDiagnostica || 0.38;
+    const impactoRatio = params.impactoRatio || 0.4;
+
+    const poblacionCubierta = poblacion * coberturaAP;
+    const pacientesPrevalentes = poblacionCubierta * prevalencia;
+    const pacientesDiagnosticados = pacientesPrevalentes * tasaDiagnostica;
+    const ratioConProyecto = tasaDiagnostica * (1 + impactoRatio);
+    const pacientesDiagnosticadosConProyecto = pacientesPrevalentes * ratioConProyecto;
+    const impactoNuevosPacientes = pacientesDiagnosticadosConProyecto - pacientesDiagnosticados;
+
+    return {
+        impactoNuevosPacientes: Math.round(impactoNuevosPacientes),
+        pacientesPrevalentes: Math.round(pacientesPrevalentes),
+        pacientesDiagnosticados: Math.round(pacientesDiagnosticados)
+    };
+}
+
+function calcularHSConnectIntra(poblacion, params) {
+    const prevalencia = params.prevalencia || 0.005;
+    const tasaDiagnostica = params.tasaDiagnostica || 0.38;
+    const incrementoTasa = params.incrementoTasa || 0.4;
+    const diagnosticosIntra = params.diagnosticosIntra || 0.2;
+
+    const pacientesPrevalentes = poblacion * prevalencia;
+    const pacientesDiagnosticados = pacientesPrevalentes * tasaDiagnostica;
+    const tasaConProyecto = tasaDiagnostica * (1 + incrementoTasa);
+    const diagnosticosIntrahospitalarios = pacientesDiagnosticados * diagnosticosIntra;
+    const pacientesDiagnosticadosConProyecto = pacientesPrevalentes * tasaConProyecto * diagnosticosIntra;
+    const impactoNuevosPacientes = pacientesDiagnosticadosConProyecto - diagnosticosIntrahospitalarios;
+
+    return {
+        impactoNuevosPacientes: Math.round(impactoNuevosPacientes),
+        pacientesPrevalentes: Math.round(pacientesPrevalentes),
+        pacientesDiagnosticados: Math.round(pacientesDiagnosticados)
+    };
+}
+
+function calcularHSEfficiency(poblacion, params) {
+    const prevalencia = params.prevalencia || 0.005;
+    const tasaDiagnostica = params.tasaDiagnostica || 0.38;
+    const tasaTratamiento = params.tasaTratamiento || 0.66;
+    const incrementoTratamiento = params.incrementoTratamiento || 0.2;
+
+    const pacientesPrevalentes = poblacion * prevalencia;
+    const pacientesDiagnosticados = pacientesPrevalentes * tasaDiagnostica;
+    const pacientesTratados = pacientesDiagnosticados * tasaTratamiento;
+    const tasaTratamientoConProyecto = tasaTratamiento * (1 + incrementoTratamiento);
+    const pacientesTratadosConProyecto = pacientesDiagnosticados * tasaTratamientoConProyecto;
+    const incrementoPacientesTratados = pacientesTratadosConProyecto - pacientesTratados;
+
+    return {
+        incrementoPacientesTratados: Math.round(incrementoPacientesTratados),
+        pacientesPrevalentes: Math.round(pacientesPrevalentes),
+        pacientesDiagnosticados: Math.round(pacientesDiagnosticados)
+    };
+}
+
+function calcularHSPROMueveDerma(poblacion, params) {
+    const prevalencia = params.prevalencia || 0.005;
+    const tasaDiagnostica = params.tasaDiagnostica || 0.38;
+    const tasaTratamiento = params.tasaTratamiento || 0.66;
+    const pacientesDinamicos = params.pacientesDinamicos || 0.19;
+    const impactoSwitch = params.impactoSwitch || 0.2;
+
+    const pacientesPrevalentes = poblacion * prevalencia;
+    const pacientesDiagnosticados = pacientesPrevalentes * tasaDiagnostica;
+    const pacientesTratados = pacientesDiagnosticados * tasaTratamiento;
+    const pacientesDinamicosBase = pacientesTratados * pacientesDinamicos;
+    const switchConProyecto = pacientesDinamicos * (1 + impactoSwitch);
+    const pacientesDinamicosConProyecto = pacientesTratados * switchConProyecto;
+    const incrementoPacientes = pacientesDinamicosConProyecto - pacientesDinamicosBase;
+
+    return {
+        incrementoPacientes: Math.round(incrementoPacientes),
+        pacientesPrevalentes: Math.round(pacientesPrevalentes),
+        pacientesDiagnosticados: Math.round(pacientesDiagnosticados)
+    };
+}
+
+function calcularHSPROMueveFH(poblacion, params) {
+    return calcularHSPROMueveDerma(poblacion, params);
+}
+
+function calcularPROMueveEspA(poblacion, params) {
+    const prevalencia = params.prevalencia || 0.0026;
+    const tasaDiagnostica = params.tasaDiagnostica || 0.4;
+    const tasaTratamiento = params.tasaTratamiento || 0.72;
+    const mercadoDinamico = params.mercadoDinamico || 0.09;
+    const incrementoShare = params.incrementoShare || 0.2;
+
+    const pacientesPrevalentes = poblacion * prevalencia;
+    const pacientesDiagnosticados = pacientesPrevalentes * tasaDiagnostica;
+    const pacientesTratados = pacientesDiagnosticados * tasaTratamiento;
+    const pacientesDinamicosBase = pacientesTratados * mercadoDinamico;
+    const shareConProyecto = mercadoDinamico * (1 + incrementoShare);
+    const pacientesDinamicosConProyecto = pacientesTratados * shareConProyecto;
+    const incrementoPacientes = pacientesDinamicosConProyecto - pacientesDinamicosBase;
+
+    return {
+        incrementoPacientes: Math.round(incrementoPacientes),
+        pacientesPrevalentes: Math.round(pacientesPrevalentes),
+        pacientesDiagnosticados: Math.round(pacientesDiagnosticados)
+    };
+}
+
+function calcularPROMueveAPs(poblacion, params) {
+    const prevalencia = params.prevalencia || 0.0056;
+    const tasaDiagnostica = params.tasaDiagnostica || 0.5;
+    const tasaTratamiento = params.tasaTratamiento || 0.8;
+    const mercadoDinamico = params.mercadoDinamico || 0.1;
+    const incrementoShare = params.incrementoShare || 0.2;
+
+    const pacientesPrevalentes = poblacion * prevalencia;
+    const pacientesDiagnosticados = pacientesPrevalentes * tasaDiagnostica;
+    const pacientesTratados = pacientesDiagnosticados * tasaTratamiento;
+    const pacientesDinamicosBase = pacientesTratados * mercadoDinamico;
+    const shareConProyecto = mercadoDinamico * (1 + incrementoShare);
+    const pacientesDinamicosConProyecto = pacientesTratados * shareConProyecto;
+    const incrementoPacientes = pacientesDinamicosConProyecto - pacientesDinamicosBase;
+
+    return {
+        incrementoPacientes: Math.round(incrementoPacientes),
+        pacientesPrevalentes: Math.round(pacientesPrevalentes),
+        pacientesDiagnosticados: Math.round(pacientesDiagnosticados)
+    };
+}
+
+function calcularEspANDE(poblacion, coberturaAP, params) {
+    const prevalencia = params.prevalencia || 0.0026;
+    const tasaDiagnostica = params.tasaDiagnostica || 0.4;
+    const impactoTasa = params.impactoTasa || 0.4;
+
+    const pacientesPrevalentes = poblacion * prevalencia;
+    const pacientesPrevalentesProyecto = pacientesPrevalentes * coberturaAP;
+    const pacientesDiagnosticados = pacientesPrevalentesProyecto * tasaDiagnostica;
+    const tasaConProyecto = tasaDiagnostica * (1 + impactoTasa);
+    const pacientesDiagnosticadosConProyecto = pacientesPrevalentesProyecto * tasaConProyecto;
+    const impactoNuevosPacientes = pacientesDiagnosticadosConProyecto - pacientesDiagnosticados;
+
+    return {
+        impactoNuevosPacientes: Math.round(impactoNuevosPacientes),
+        pacientesPrevalentes: Math.round(pacientesPrevalentes),
+        pacientesDiagnosticados: Math.round(pacientesDiagnosticados)
+    };
+}
+
+function resetearCalculos() {
+    hospitales.forEach(hospital => {
+        hospital.impactos = {};
+    });
+    actualizarTablaHospitales();
+    ocultarResumenes();
+    alert('Cálculos reseteados.');
+}
+
+// FUNCIONES DE VISUALIZACIÓN
+function actualizarTablaHospitales() {
+    const tbody = document.getElementById('hospitalTableBody');
+
+    if (hospitales.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="10" class="empty-state"> Importa la base de datos para cargar hospitales
+                </td>
+            </tr>
+        `;
+        document.getElementById('selectAllHospitals').disabled = true;
+        document.getElementById('leyendaHospitales').style.display = 'none';
+        return;
+    }
+
+    const leyendaDiv = document.getElementById('leyendaHospitales');
+    let leyendaHTML = '';
+
+    // Leyenda dinámica de CCAA (solo si hay más de una CCAA en la selección)
+    const ccaaEnSeleccion = [...new Set(hospitales.map(h => h.ca))];
+    if (ccaaEnSeleccion.length > 1) {
+        leyendaHTML += `<strong>🌍 CCAA:</strong> `;
+        ccaaEnSeleccion.forEach(ca => {
+            const bgColor = ccaaColors[ca] || '#f8fafc';
+            leyendaHTML += `<span style="background: ${bgColor}; padding: 2px 8px; border-radius: 4px; margin: 0 5px;">${ca}</span> `;
+        });
+    }
+
+    // Leyenda dinámica de ISP (solo si hay más de un ISP en la selección)
+    const ispsEnSeleccion = [...new Set(hospitales.map(h => h.isp))];
+    if (ispsEnSeleccion.length > 1) {
+        if (leyendaHTML) leyendaHTML += '<br><br>';
+        leyendaHTML += `<strong>👥 ISP:</strong> `;
+        ispsEnSeleccion.forEach(isp => {
+            const color = ispColors[isp] || '#999';
+            leyendaHTML += `<span style="border-left: 5px solid ${color}; padding: 2px 8px; margin: 0 5px; background: ${color}22;">${isp}</span> `;
+        });
+    }
+
+    // Si no hay leyenda (solo un ISP y una CCAA), mostrar información mínima
+    if (!leyendaHTML) {
+        leyendaHTML = `<span style="color: #6b7280; font-size: 12px;">📍 ${territorioActual || 'Análisis Nacional'}</span>`;
+    }
+
+    // Agregar leyenda para hospitales fusionados si existe alguno
+    const hayHospitalesFusionados = hospitales.some(h => h.esFusionado);
+    if (hayHospitalesFusionados) {
+        leyendaHTML += `
+            <br><br>
+            <strong>🔗 Hospitales Fusionados:</strong>
+            <span style="border-left: 5px solid var(--aquatic-awe); padding: 2px 8px; margin: 0 5px; background: rgba(62, 183, 179, 0.1);">Hospital Fusionado</span>
+        `;
+    }
+    
+    leyendaDiv.innerHTML = leyendaHTML;
+    leyendaDiv.style.display = 'block';
+
+    document.getElementById('selectAllHospitals').disabled = false;
+    const allSelected = hospitales.every(h => h.seleccionado);
+    document.getElementById('selectAllHospitals').checked = allSelected;
+
+    tbody.innerHTML = '';
+
+    hospitales.forEach(hospital => {
+        const tieneCalculos = hospital.impactos && Object.keys(hospital.impactos).length > 0 &&
+                            Object.values(hospital.impactos).some(impacto => !impacto.error);
+        const estadoCalculo = tieneCalculos ?
+            '<span style="color: var(--aquatic-awe);">✅ Calculado</span>' :
+            '<span style="color: #6b7280;">⏳ Pendiente</span>';
+
+        let regionalClass = '';
+        if (hospital.ca) {
+            const ca = hospital.ca.toLowerCase();
+            if (ca.includes('andalucia') || ca.includes('andalucía')) {
+                regionalClass = 'hospital-row-andalucia';
+            } else if (ca.includes('extremadura')) {
+                regionalClass = 'hospital-row-extremadura';
+            } else if (ca.includes('canarias') || ca.includes('islas canarias') || ca.includes('canaria')) {
+                regionalClass = 'hospital-row-canarias';
+            }
+        }
+
+        const row = document.createElement('tr');
+        if (regionalClass) {
+            row.classList.add(regionalClass);
+        }
+        
+        // Estilo especial para hospitales fusionados
+        if (hospital.esFusionado) {
+            row.classList.add('hospital-row-fusionado');
+        } else {
+            // Coloreado dinámico por ISP
+            const ispColor = ispColors[hospital.isp];
+            if (ispColor) {
+                row.style.setProperty('border-left', `8px solid ${ispColor}`, 'important');
+                row.style.setProperty('box-shadow', `inset 8px 0 0 ${ispColor}`, 'important');
+                row.style.setProperty('background-color', `${ispColor}22`, 'important');
+            } else {
+                row.style.removeProperty('border-left');
+                row.style.removeProperty('box-shadow');
+                row.style.removeProperty('background-color');
+            }
+        }
+        
+        row.innerHTML = `
+            <td>
+                <input type="checkbox" class="hospital-select-checkbox"
+                    data-hospital-id="${hospital.id}"
+                    ${hospital.seleccionado ? 'checked' : ''}
+                    onchange="toggleHospitalSelection(${hospital.id})">
+            </td>
+            <td>
+                <input type="checkbox" class="hospital-select-checkbox"
+                    data-hospital-id="${hospital.id}"
+                    ${hospitalesParaFusionar.includes(hospital.id) ? 'checked' : ''}
+                    onchange="toggleHospitalParaFusion(${hospital.id})"
+                    style="background-color: var(--ray-flower);">
+            </td>
+            <td class="codigo-hospital">${hospital.codigo}</td>
+            <td class="hospital-name">
+                ${hospital.nombre}
+                ${hospital.esFusionado ? '<br><small style="color: var(--aquatic-awe); font-size: 10px;">🔗 Hospital Fusionado</small>' : ''}
+            </td>
+            <td>${hospital.provincia || 'N/A'}</td>
+            <td style="font-weight: 500; font-size: 11px;">${hospital.isp}</td>
+            <td>${hospital.poblacion?.toLocaleString() || 'N/A'}</td>
+            <td>
+                <input type="number" step="0.01" min="0" max="100" class="cobertura-ap-input"
+                       id="cobertura-ap-${hospital.id}"
+                       value="${(hospital.coberturaAP * 100).toFixed(2)}"
+                       onchange="updateCoberturaAP(${hospital.id}, this.value)">
+            </td>
+            <td class="proyecto-tags" id="proyectos-cell-${hospital.id}"></td>
+            <td>${estadoCalculo}</td>
+        `;
+
+        tbody.appendChild(row);
+        actualizarColumnaProyectos(hospital.id);
+    });
+}
+
+function actualizarResumenes() {
+    const hospitalesSeleccionados = hospitales.filter(h => h.seleccionado);
+
+    if (hospitalesSeleccionados.length === 0) {
+        ocultarResumenes();
+        if (hospitales.length > 0) {
+            const container = document.getElementById('resumenProyectosContainer');
+            container.innerHTML = '<div class="empty-state">Selecciona al menos un hospital usando los checkboxes para ver los resúmenes de impacto.</div>';
+            document.getElementById('resumenProyectosSection').style.display = 'block';
+        }
+        return;
+    }
+
+    const proyectoStats = {};
+    let totalPoblacionGlobal = 0;
+    let totalHospitalesGlobal = hospitalesSeleccionados.length;
+
+    let totalDiagnosticosReuma = 0;
+    let totalDiagnosticosHS = 0;
+    let totalSwitchHS = 0;
+    let totalSwitchEspA = 0;
+    let totalSwitchAPs = 0;
+
+    hospitalesSeleccionados.forEach(hospital => {
+        totalPoblacionGlobal += hospital.poblacion || 0;
+
+        hospital.proyectos.forEach(proyectoId => {
+            if (!proyectoStats[proyectoId]) {
+                proyectoStats[proyectoId] = {
+                    hospitales: [],
+                    poblacionTotal: 0,
+                    impactoTotal: 0,
+                    proyecto: proyectos[proyectoId]
+                };
+            }
+            proyectoStats[proyectoId].hospitales.push(hospital);
+            proyectoStats[proyectoId].poblacionTotal += hospital.poblacion || 0;
+
+            if (hospital.impactos && hospital.impactos[proyectoId] && !hospital.impactos[proyectoId].error) {
+                const impacto = hospital.impactos[proyectoId];
+                const projArea = proyectos[proyectoId].area;
+                const projName = proyectos[proyectoId].nombre;
+
+                if (impacto.impactoNuevosPacientes) {
+                    proyectoStats[proyectoId].impactoTotal += impacto.impactoNuevosPacientes;
+                    if (projArea === 'Reuma') {
+                        totalDiagnosticosReuma += impacto.impactoNuevosPacientes;
+                    } else if (projArea === 'HS') {
+                        totalDiagnosticosHS += impacto.impactoNuevosPacientes;
+                    }
+                } else if (impacto.incrementoPacientesTratados) {
+                    proyectoStats[proyectoId].impactoTotal += impacto.incrementoPacientesTratados;
+                    totalSwitchHS += impacto.incrementoPacientesTratados;
+                } else if (impacto.incrementoPacientes) {
+                    proyectoStats[proyectoId].impactoTotal += impacto.incrementoPacientes;
+                    if (projName === 'HS-PROMueve-Derma' || projName === 'HS-PROMueve-FH') {
+                        totalSwitchHS += impacto.incrementoPacientes;
+                    } else if (projName === 'PROMueve-EspA') {
+                        totalSwitchEspA += impacto.incrementoPacientes;
+                    } else if (projName === 'PROMueve-APs') {
+                        totalSwitchAPs += impacto.incrementoPacientes;
+                    }
+                }
+            }
+        });
+    });
+
+    mostrarResumenPorProyecto(proyectoStats, totalHospitalesGlobal, totalPoblacionGlobal);
+    mostrarResumenPorHospital(hospitalesSeleccionados);
+    mostrarResumenTotal(totalHospitalesGlobal, totalPoblacionGlobal, totalDiagnosticosReuma, totalDiagnosticosHS, totalSwitchHS, totalSwitchEspA, totalSwitchAPs);
+
+    document.getElementById('resumenProyectosSection').style.display = 'block';
+    document.getElementById('resumenHospitalesSection').style.display = 'block';
+    const resumenTotal = document.getElementById('resumenTotalImpacto');
+    resumenTotal.style.display = 'block';
+    setTimeout(() => resumenTotal.classList.add('active'), 50);
+}
+
+function mostrarResumenPorProyecto(proyectoStats, totalHospitales, totalPoblacion) {
+    const container = document.getElementById('resumenProyectosContainer');
+    container.innerHTML = '';
+
+    document.getElementById('totalHospitalesISP').textContent = totalHospitales;
+    document.getElementById('totalPoblacionISP').textContent = totalPoblacion.toLocaleString();
+
+    let html = '';
+
+    Object.keys(proyectoStats).forEach(proyectoId => {
+        const stats = proyectoStats[proyectoId];
+        const proyecto = stats.proyecto;
+
+        let hospitalesAsignadosHtml = '<div style="display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px;">';
+        if (stats.hospitales.length > 0) {
+            stats.hospitales.forEach(hospital => {
+                hospitalesAsignadosHtml += `<span class="hospital-tag">
+                                                ${hospital.nombre} (${(hospital.coberturaAP * 100).toFixed(2)}%)
+                                            </span>`;
+            });
+        } else {
+            hospitalesAsignadosHtml += '<span style="font-size: 11px; color: #6b7280;">Ninguno</span>';
+        }
+        hospitalesAsignadosHtml += '</div>';
+
+        html += `
+            <div class="impact-card" style="border-left: 4px solid ${proyecto.color}; cursor: pointer;" onclick="abrirDetalleProyecto('${proyectoId}')">
+                <h4 style="color: ${proyecto.color};">${proyecto.nombre}</h4>
+                <div class="impact-metric">
+                    <span class="impact-metric-label">Hospitales asignados</span>
+                    <span class="impact-metric-value">${stats.hospitales.length}</span>
+                </div>
+                <div style="padding: 8px 0; border-bottom: 1px solid #f3f4f6;">
+                    ${hospitalesAsignadosHtml}
+                </div>
+                <div class="impact-metric">
+                    <span class="impact-metric-label">Población cubierta</span>
+                    <span class="impact-metric-value">${stats.poblacionTotal.toLocaleString()}</span>
+                </div>
+                <div class="impact-metric">
+                    <span class="impact-metric-label">🎯 Impacto pacientes</span>
+                    <span class="impact-metric-value" style="color: var(--aquatic-awe); font-weight: 700;">
+                        ${stats.impactoTotal > 0 ? '+' + stats.impactoTotal.toLocaleString() : 'Pendiente'}
+                    </span>
+                </div>
+            </div>
+        `;
+    });
+
+    container.innerHTML += html;
+}
+
+function mostrarResumenPorHospital(hospitalesSeleccionados) {
+    const hospitalesPorProyectoContainer = document.getElementById('hospitalesPorProyectoContainer');
+    hospitalesPorProyectoContainer.innerHTML = '';
+
+    let hospitalesHtml = '';
+    hospitalesSeleccionados.forEach(hospital => {
+        if (hospital.proyectos && hospital.proyectos.length > 0) {
+            let proyectosList = '';
+            hospital.proyectos.forEach(pId => {
+                const proj = proyectos[pId];
+                if (proj) {
+                    proyectosList += `<span class="proyecto-tag" style="background: ${proj.color};">${proj.nombre}</span> `;
+                }
+            });
+
+            let nuevosDxReuma = 0;
+            let switchEspA = 0;
+            let switchAPs = 0;
+            
+            // Métricas detalladas para HS
+            let nuevosDxHS_AP = 0;
+            let nuevosDxHS_Intra = 0;
+            let incrementoPacientesTratadosHS = 0;
+            let switchHS_Derma = 0;
+            let switchHS_FH = 0;
+
+            Object.keys(hospital.impactos).forEach(pId => {
+                const impacto = hospital.impactos[pId];
+                if (impacto && !impacto.error) {
+                    const projArea = proyectos[pId]?.area;
+                    const projName = proyectos[pId]?.nombre;
+
+                    // Cálculos de Reuma (sin cambios)
+                    if (impacto.impactoNuevosPacientes && projArea === 'Reuma') nuevosDxReuma += impacto.impactoNuevosPacientes;
+                    if (impacto.incrementoPacientes && projName === 'PROMueve-EspA') switchEspA += impacto.incrementoPacientes;
+                    if (impacto.incrementoPacientes && projName === 'PROMueve-APs') switchAPs += impacto.incrementoPacientes;
+
+                    // Cálculos detallados para HS según el ID del proyecto
+                    switch (pId) {
+                        case 'HS-Connect-AP ':
+                            if (impacto.impactoNuevosPacientes) nuevosDxHS_AP += impacto.impactoNuevosPacientes;
+                            break;
+                        case 'HS-Connect Intra':
+                            if (impacto.impactoNuevosPacientes) nuevosDxHS_Intra += impacto.impactoNuevosPacientes;
+                            break;
+                        case 'HS-Efficiency':
+                            if (impacto.incrementoPacientesTratados) incrementoPacientesTratadosHS += impacto.incrementoPacientesTratados;
+                            break;
+                        case 'HS-PROMueve-Derma':
+                            if (impacto.incrementoPacientes) switchHS_Derma += impacto.incrementoPacientes;
+                            break;
+                        case 'HS-PROMUEVE-FH':
+                            if (impacto.incrementoPacientes) switchHS_FH += impacto.incrementoPacientes;
+                            break;
+                    }
+                }
+            });
+
+            hospitalesHtml += `
+                <div class="hospital-summary-card">
+                    <h4>${hospital.nombre}</h4>
+                    <div class="impact-metric">
+                        <span class="impact-metric-label">Provincia</span>
+                        <span class="impact-metric-value">${hospital.provincia}</span>
+                    </div>
+                    <div class="impact-metric">
+                        <span class="impact-metric-label">ISP</span>
+                        <span class="impact-metric-value">${hospital.isp}</span>
+                    </div>
+                    <div class="impact-metric">
+                        <span class="impact-metric-label">Población asistencial</span>
+                        <span class="impact-metric-value">${hospital.poblacion.toLocaleString()}</span>
+                    </div>
+                    <div class="impact-metric">
+                        <span class="impact-metric-label">Cobertura AP (%)</span>
+                        <span class="impact-metric-value">${(hospital.coberturaAP * 100).toFixed(2)}%</span>
+                    </div>
+                    <div class="impact-metric">
+                        <span class="impact-metric-label">Nº de proyectos</span>
+                        <span class="impact-metric-value">${hospital.proyectos.length}</span>
+                    </div>
+                    <div class="impact-metric">
+                        <span class="impact-metric-label">Tipo de proyectos</span>
+                        <span class="impact-metric-value">${proyectosList}</span>
+                    </div>
+                    <div class="impact-metric">
+                        <span class="impact-metric-label">🦴 Nuevos Pac Dx Reuma</span>
+                        <span class="impact-metric-value">${nuevosDxReuma.toLocaleString()}</span>
+                    </div>
+                    <div class="impact-metric">
+                        <span class="impact-metric-label">📈 Nuevos Pac Dx HS - AP</span>
+                        <span class="impact-metric-value">${nuevosDxHS_AP.toLocaleString()}</span>
+                    </div>
+                    <div class="impact-metric">
+                        <span class="impact-metric-label">📈 Nuevos Pac Dx HS - Intra</span>
+                        <span class="impact-metric-value">${nuevosDxHS_Intra.toLocaleString()}</span>
+                    </div>
+                    <div class="impact-metric">
+                        <span class="impact-metric-label">⚙️ Incremento Pacientes Tratados HS</span>
+                        <span class="impact-metric-value">${incrementoPacientesTratadosHS.toLocaleString()}</span>
+                    </div>
+                    <div class="impact-metric">
+                        <span class="impact-metric-label">🔁 Switch Pacientes HS-Derma</span>
+                        <span class="impact-metric-value">${switchHS_Derma.toLocaleString()}</span>
+                    </div>
+                    <div class="impact-metric">
+                        <span class="impact-metric-label">🔁 Switch Pacientes HS-FH</span>
+                        <span class="impact-metric-value">${switchHS_FH.toLocaleString()}</span>
+                    </div>
+                    <div class="impact-metric">
+                        <span class="impact-metric-label">🔁 Switch Pacientes EspA</span>
+                        <span class="impact-metric-value">${switchEspA.toLocaleString()}</span>
+                    </div>
+                    <div class="impact-metric">
+                        <span class="impact-metric-label">🔁 Switch Pacientes APs</span>
+                        <span class="impact-metric-value">${switchAPs.toLocaleString()}</span>
+                    </div>
+                </div>
+            `;
+        }
+    });
+    hospitalesPorProyectoContainer.innerHTML = hospitalesHtml;
+}
+
+function mostrarResumenTotal(totalHospitales, totalPoblacion, totalDiagnosticosReuma, totalDiagnosticosHS, totalSwitchHS, totalSwitchEspA, totalSwitchAPs) {
+    document.getElementById('totalHospitalesConsolidado').textContent = totalHospitales;
+    document.getElementById('totalPoblacionConsolidado').textContent = totalPoblacion.toLocaleString();
+
+    const hospitalesSeleccionados = hospitales.filter(h => h.seleccionado);
+    let hospEspANDE = 0, hospPROMueveEspA = 0, hospPROMueveAPs = 0;
+    let hospHSConnectAP = 0, hospHSConnectIntra = 0, hospHSEfficiency = 0;
+    let hospHSPROMueveDerma = 0, hospHSPROMueveFH = 0;
+    
+    let pacientesHSConnectAP = 0, pacientesHSConnectIntra = 0;
+    let switchHSDerma = 0, switchHSFH = 0, totalCapacidadHS = 0;
+
+    hospitalesSeleccionados.forEach(hospital => {
+        if (hospital.proyectos) {
+            hospital.proyectos.forEach(proyectoId => {
+                switch(proyectoId) {
+                    case 'EspANDE ':
+                        hospEspANDE++;
+                        break;
+                    case 'PROMUEVE EspA':
+                        hospPROMueveEspA++;
+                        break;
+                    case 'PROMueve APs':
+                        hospPROMueveAPs++;
+                        break;
+                    case 'HS-Connect-AP ':
+                        hospHSConnectAP++;
+                        break;
+                    case 'HS-Connect Intra':
+                        hospHSConnectIntra++;
+                        break;
+                    case 'HS-Efficiency':
+                        hospHSEfficiency++;
+                        break;
+                    case 'HS-PROMueve-Derma':
+                        hospHSPROMueveDerma++;
+                        break;
+                    case 'HS-PROMUEVE-FH':
+                        hospHSPROMueveFH++;
+                        break;
+                }
+                
+                if (hospital.impactos && hospital.impactos[proyectoId] && !hospital.impactos[proyectoId].error) {
+                    const impacto = hospital.impactos[proyectoId];
+                    
+                    switch(proyectoId) {
+                        case 'HS-Connect-AP ':
+                            if (impacto.impactoNuevosPacientes) {
+                                pacientesHSConnectAP += impacto.impactoNuevosPacientes;
+                            }
+                            break;
+                        case 'HS-Connect Intra':
+                            if (impacto.impactoNuevosPacientes) {
+                                pacientesHSConnectIntra += impacto.impactoNuevosPacientes;
+                            }
+                            break;
+                        case 'HS-Efficiency':
+                            if (impacto.incrementoPacientesTratados) {
+                                totalCapacidadHS += impacto.incrementoPacientesTratados;
+                            }
+                            break;
+                        case 'HS-PROMueve-Derma':
+                            if (impacto.incrementoPacientes) {
+                                switchHSDerma += impacto.incrementoPacientes;
+                            }
+                            break;
+                        case 'HS-PROMUEVE-FH':
+                            if (impacto.incrementoPacientes) {
+                                switchHSFH += impacto.incrementoPacientes;
+                            }
+                            break;
+                    }
+                }
+            });
+        }
+    });
+
+    document.getElementById('hospEspANDE').textContent = hospEspANDE;
+    document.getElementById('hospPROMueveEspA').textContent = hospPROMueveEspA;
+    document.getElementById('hospPROMueveAPs').textContent = hospPROMueveAPs;
+    document.getElementById('hospHSConnectAP').textContent = hospHSConnectAP;
+    document.getElementById('hospHSConnectIntra').textContent = hospHSConnectIntra;
+    document.getElementById('hospHSEfficiency').textContent = hospHSEfficiency;
+    document.getElementById('hospHSPROMueveDerma').textContent = hospHSPROMueveDerma;
+    document.getElementById('hospHSPROMueveFH').textContent = hospHSPROMueveFH;
+
+    document.getElementById('totalDiagnosticosReuma').textContent = totalDiagnosticosReuma.toLocaleString();
+    document.getElementById('totalDiagnosticosHS').textContent = totalDiagnosticosHS.toLocaleString();
+    document.getElementById('totalSwitchHS').textContent = totalSwitchHS.toLocaleString();
+    document.getElementById('totalSwitchEspA').textContent = totalSwitchEspA.toLocaleString();
+    document.getElementById('totalSwitchAPs').textContent = totalSwitchAPs.toLocaleString();
+
+    document.getElementById('pacientesHSConnectAP').textContent = pacientesHSConnectAP.toLocaleString();
+    document.getElementById('pacientesHSConnectIntra').textContent = pacientesHSConnectIntra.toLocaleString();
+    document.getElementById('totalCapacidadHS').textContent = totalCapacidadHS.toLocaleString();
+    document.getElementById('switchHSDerma').textContent = switchHSDerma.toLocaleString();
+    document.getElementById('switchHSFH').textContent = switchHSFH.toLocaleString();
+    
+    // Total Switch HS = solo suma de Derma + FH
+    const totalSwitchHSCalculado = switchHSDerma + switchHSFH;
+    document.getElementById('totalSwitchHS').textContent = totalSwitchHSCalculado.toLocaleString();
+    
+    const totalSwitchReuma = totalSwitchEspA + totalSwitchAPs;
+    document.getElementById('totalSwitchReuma').textContent = totalSwitchReuma.toLocaleString();
+}
+
+function ocultarResumenes() {
+    document.getElementById('resumenProyectosSection').style.display = 'none';
+    document.getElementById('resumenHospitalesSection').style.display = 'none';
+    document.getElementById('resumenTotalImpacto').style.display = 'none';
+}
+
+function exportarResultados() {
+    if (hospitales.length === 0) {
+        alert('No hay datos para exportar.');
+        return;
+    }
+
+    const resultados = {
+        fecha: new Date().toISOString(),
+        territorio: territorioActual || 'No definido',
+        totalHospitales: hospitales.length,
+        hospitales: hospitales.map(h => ({
+            codigo: h.codigo,
+            nombre: h.nombre,
+            provincia: h.provincia,
+            ca: h.ca,
+            isp: h.isp,
+            poblacion: h.poblacion,
+            coberturaAP: h.coberturaAP,
+            proyectos: h.proyectos,
+            impactos: h.impactos || {},
+            seleccionado: h.seleccionado,
+            esFusionado: h.esFusionado || false,
+            hospitalesOriginales: h.hospitalesOriginales || []
+        })),
+        parametrosCargados: parametrosCargados,
+        version: 'NACIONAL_1.0'
+    };
+
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(resultados, null, 2));
+    const downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href", dataStr);
+    
+    const safeTerritorio = (territorioActual || 'no_definido')
+        .toLowerCase()
+        .replace(/[^a-z0-9áéíóúñ\s]/g, '')
+        .replace(/\s+/g, '_')
+        .substring(0, 40);
+    const fileName = `territorio_${safeTerritorio}_${new Date().toISOString().split('T')[0]}.json`;
+    
+    downloadAnchorNode.setAttribute("download", fileName);
+    document.body.appendChild(downloadAnchorNode);
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+}
+
+function exportarResumenHTML() {
+    if (hospitales.length === 0) {
+        alert('No hay datos para exportar.');
+        return;
+    }
+
+    const hospitalesSeleccionados = hospitales.filter(h => h.seleccionado);
+    if (hospitalesSeleccionados.length === 0) {
+        alert('No hay hospitales seleccionados para exportar.');
+        return;
+    }
+
+    const resumenProyectos = document.getElementById('resumenPorProyectoContent').innerHTML;
+    const resumenHospitales = document.getElementById('resumenPorHospitalContent').innerHTML;
+    const resumenTotal = document.getElementById('resumenTotalImpacto').innerHTML;
+
+    const htmlContent = `
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resumen de Impacto - ${territorioActual}</title>
+    <style>
+        :root {
+            --future-dusk: #3F3950;
+            --transcendent-pink: #E3D8DA;
+            --aquatic-awe: #3EB7B3;
+            --sunset-coral: #FF6F61;
+            --ray-flower: #FFD23F;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            background: #f9fafb;
+            color: var(--future-dusk);
+        }
+        .export-header {
+            background: var(--sunset-coral);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .section-title {
+            color: var(--future-dusk);
+            border-bottom: 2px solid var(--aquatic-awe);
+            padding-bottom: 10px;
+            margin: 30px 0 20px 0;
+            font-size: 1.3em;
+            font-weight: 500;
+        }
+        .summary-section {
+            background: #fce7f3;
+            border: 1px solid var(--aquatic-awe);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .impact-card {
+            background: white;
+            border: 1px solid #e0e6ed;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .impact-card h4 {
+            margin: 0 0 12px 0;
+            color: var(--future-dusk);
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .impact-metric {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        .impact-metric:last-child {
+            border-bottom: none;
+        }
+        .impact-metric-label {
+            font-size: 13px;
+            color: #6b7280;
+        }
+        .impact-metric-value {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--future-dusk);
+        }
+        .stat-card-impacto {
+            background: #fce7f3;
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid var(--aquatic-awe);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            margin-bottom: 16px;
+            display: inline-block;
+            min-width: 200px;
+            margin-right: 16px;
+        }
+        .stat-number {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: var(--aquatic-awe);
+            margin-bottom: 4px;
+        }
+        .stat-label {
+            color: #6b7280;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        .hospital-summary-card {
+            background: white;
+            border: 1px solid #e0e6ed;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 15px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .hospital-summary-card h4 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: var(--future-dusk);
+        }
+        .proyecto-tag {
+            display: inline-block;
+            margin: 2px;
+            padding: 4px 8px;
+            color: white;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 500;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        .hospital-tag {
+            display: inline-block;
+            background-color: #e0e7ff;
+            color: #3b82f6;
+            padding: 6px 10px;
+            margin: 4px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 500;
+            border: 1px solid #c7d2fe;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        .summary-row-centered {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            width: 100%;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+        .resumen-impacto-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+        }
+        .therapeutic-area-section {
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .reuma-section {
+            background: #f0f8ff;
+            color: #1f2937;
+            border: 1px solid #3b82f6;
+        }
+        .hs-section {
+            background: #fff5f0;
+            color: #1f2937;
+            border: 1px solid #f97316;
+        }
+        .therapeutic-area-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .therapeutic-area-header h4 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            color: #1f2937;
+        }
+        .intervention-group {
+            margin-bottom: 20px;
+            border-radius: 8px;
+            padding: 15px;
+        }
+        .reuma-section .expansion-group {
+            background: #206068;
+        }
+        .reuma-section .switch-group {
+            background: #FFC100;
+            color: #1f2937;
+        }
+        .hs-section .expansion-group {
+            background: #206068;
+        }
+        .hs-section .capacity-group {
+            background: #FF585D;
+        }
+        .hs-section .switch-group {
+            background: #FFC100;
+            color: #1f2937;
+        }
+        .intervention-header {
+            font-weight: 600;
+            font-size: 16px;
+            text-align: center;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: white;
+        }
+        .project-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .project-card {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 6px;
+            padding: 8px;
+            text-align: center;
+            backdrop-filter: blur(4px);
+            color: #1f2937;
+            font-weight: 600;
+        }
+        .project-label {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-bottom: 3px;
+            font-weight: 600;
+        }
+        .project-name {
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .project-count {
+            font-weight: 700;
+            font-size: 18px;
+            color: #1f2937;
+            margin-top: 4px;
+        }
+        .metric-card {
+            background: rgba(255, 255, 255, 0.9);
+            color: #1f2937;
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+            margin-top: 10px;
+        }
+        .metric-primary {
+            background: rgba(255, 255, 255, 1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .metric-summary {
+            background: rgba(255, 255, 255, 1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border: 2px solid rgba(0,0,0,0.1);
+        }
+        .metric-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1f2937;
+        }
+        .metric-label {
+            font-size: 12px;
+            color: #6b7280;
+            font-weight: 500;
+            margin-top: 4px;
+        }
+        @media print {
+            body { margin: 0; }
+            .export-header { break-after: avoid; }
+            .section-title { break-after: avoid; }
+        }
+    </style>
+</head>
+<body>
+    <div class="export-header">
+        <h1>📊 Resumen de Impacto - ${territorioActual}</h1>
+        <p>Fecha de exportación: ${new Date().toLocaleDateString('es-ES')} a las ${new Date().toLocaleTimeString('es-ES')}</p>
+        <p>Hospitales seleccionados: ${hospitalesSeleccionados.length} de ${hospitales.length}</p>
+    </div>
+
+    <h2 class="section-title">🎯 Resumen de Impacto - Por Proyecto</h2>
+    ${resumenProyectos}
+
+    <h2 class="section-title">🏥 Resumen de Impacto - Por Hospital</h2>
+    ${resumenHospitales}
+
+    <h2 class="section-title">📌 Resumen Consolidado de Impacto</h2>
+    ${resumenTotal}
+
+    <div style="margin-top: 40px; padding: 20px; background: #f3f4f6; border-radius: 8px; text-align: center; font-size: 12px; color: #6b7280;">
+        <p>Generado por Herramienta HIS Inmuno - ${territorioActual}</p>
+        <p><strong>Esta herramienta ha sido creada por Silvia Márquez, todos los derechos reservados.</strong></p>
+    </div>
+</body>
+</html>`;
+
+    const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href", url);
+    
+    const safeTerritorioHtml = (territorioActual || 'no_definido')
+        .toLowerCase()
+        .replace(/[^a-z0-9áéíóúñ\s]/g, '')
+        .replace(/\s+/g, '_')
+        .substring(0, 40);
+    const htmlFileName = `resumen_impacto_${safeTerritorioHtml}_${new Date().toISOString().split('T')[0]}.html`;
+    
+    downloadAnchorNode.setAttribute("download", htmlFileName);
+    document.body.appendChild(downloadAnchorNode);
+    downloadAnchorNode.click();
+    document.body.removeChild(downloadAnchorNode);
+    URL.revokeObjectURL(url);
+
+    alert(`✅ Resumen HTML exportado correctamente para ${territorioActual}. El archivo incluye las 3 secciones de resumen con estilos completos.`);
+}
+
+function importarJSON() {
+    document.getElementById('fileInputJSON').click();
+}
+
+function procesarArchivoJSON() {
+    const fileInput = document.getElementById('fileInputJSON');
+    const file = fileInput.files[0];
+
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const data = JSON.parse(e.target.result);
+            
+            if (!data.hospitales || !Array.isArray(data.hospitales)) {
+                throw new Error('El archivo JSON no tiene la estructura correcta');
+            }
+
+            hospitales = [];
+            hospitalIdCounter = 1;
+
+            territorioActual = data.territorio || 'Importado desde JSON';
+            
+            data.hospitales.forEach(hospitalData => {
+                const hospital = {
+                    id: hospitalIdCounter++,
+                    codigo: hospitalData.codigo,
+                    nombre: hospitalData.nombre,
+                    provincia: hospitalData.provincia,
+                    ca: hospitalData.ca || 'N/A',
+                    poblacion: hospitalData.poblacion,
+                    coberturaAP: hospitalData.coberturaAP || 0,
+                    isp: hospitalData.isp,
+                    proyectos: hospitalData.proyectos || [],
+                    impactos: hospitalData.impactos || {},
+                    seleccionado: hospitalData.seleccionado !== undefined ? hospitalData.seleccionado : true,
+                    esFusionado: hospitalData.esFusionado || false,
+                    hospitalesOriginales: hospitalData.hospitalesOriginales || []
+                };
+                hospitales.push(hospital);
+            });
+
+            // GUARDAR COPIA COMPLETA para permitir filtrado posterior
+            hospitalesCompletos = [...hospitales];
+
+            actualizarTablaHospitales();
+            actualizarTitulosTerritorio();
+            actualizarResumenes();
+            habilitarControles();
+
+            alert(`✅ JSON importado correctamente.\n🏥 ${hospitales.length} hospitales cargados.\n📊 Territorio: ${territorioActual}\n🔄 Ahora puedes filtrar por comunidades autónomas.`);
+
+        } catch (error) {
+            console.error('Error al importar JSON:', error);
+            alert(`❌ Error al importar JSON: ${error.message}`);
+        }
+    };
+    reader.readAsText(file);
+}
+
+// FUNCIONES DE MODAL
+function abrirDetalleProyecto(proyectoId) {
+    const proyecto = proyectos[proyectoId];
+    if (!proyecto) return;
+
+    document.getElementById('modalTitle').textContent = proyecto.nombre;
+
+    const hospitalesConProyecto = hospitales.filter(h => h.seleccionado && h.proyectos && h.proyectos.includes(proyectoId));
+
+    let contenidoHtml = `
+        <div class="impact-card">
+            <h4>Información del Proyecto</h4>
+            <div class="impact-metric">
+                <span class="impact-metric-label">Área terapéutica</span>
+                <span class="impact-metric-value">${proyecto.area}</span>
+            </div>
+            <div class="impact-metric">
+                <span class="impact-metric-label">Descripción</span>
+                <span class="impact-metric-value">${proyecto.descripcion}</span>
+            </div>
+            <div class="impact-metric">
+                <span class="impact-metric-label">Hospitales asignados (seleccionados)</span>
+                <span class="impact-metric-value">${hospitalesConProyecto.length}</span>
+            </div>
+        </div>
+    `;
+
+    if (hospitalesConProyecto.length > 0) {
+        contenidoHtml += '<div class="impact-card"><h4>Hospitales en el Proyecto (seleccionados)</h4>';
+
+        hospitalesConProyecto.forEach(hospital => {
+            const impacto = hospital.impactos && hospital.impactos[proyectoId];
+            let impactoTexto = 'No calculado';
+
+            if (impacto && !impacto.error) {
+                if (impacto.impactoNuevosPacientes) {
+                    impactoTexto = `+${impacto.impactoNuevosPacientes} nuevos pacientes`;
+                } else if (impacto.incrementoPacientesTratados) {
+                    impactoTexto = `+${impacto.incrementoPacientesTratados} pacientes tratados`;
+                } else if (impacto.incrementoPacientes) {
+                    impactoTexto = `+${impacto.incrementoPacientes} pacientes dinámicos`;
+                }
+            }
+
+            contenidoHtml += `
+                <div style="border: 1px solid #e0e6ed; border-radius: 6px; padding: 12px; margin: 8px 0; background: #f9fafb;">
+                    <div style="font-weight: 500; margin-bottom: 4px;">${hospital.nombre}</div>
+                    <div style="font-size: 11px; color: #6b7280; margin-bottom: 4px;">
+                        ISP: ${hospital.isp}, Provincia: ${hospital.provincia}, Población: ${hospital.poblacion?.toLocaleString()}, Cobertura AP: ${(hospital.coberturaAP * 100).toFixed(2)}%
+                    </div>
+                    <div style="font-size: 12px; color: var(--aquatic-awe); font-weight: 500;">
+                        📊 ${impactoTexto}
+                    </div>
+                </div>
+            `;
+        });
+
+        contenidoHtml += '</div>';
+    }
+
+    document.getElementById('modalBody').innerHTML = contenidoHtml;
+    document.getElementById('projectModal').classList.add('active');
+}
+
+function cerrarModal() {
+    document.getElementById('projectModal').classList.remove('active');
+}
+
+// FUNCIONES DE FUSIÓN DE HOSPITALES
+function toggleHospitalParaFusion(hospitalId) {
+    const index = hospitalesParaFusionar.indexOf(hospitalId);
+    
+    if (index > -1) {
+        // Quitar de la lista
+        hospitalesParaFusionar.splice(index, 1);
+    } else {
+        // Agregar a la lista
+        if (hospitalesParaFusionar.length >= 2) {
+            alert('⚠️ Solo puedes seleccionar 2 hospitales para fusionar. Deselecciona uno primero.');
+            // Desmarcar el checkbox
+            const checkbox = document.querySelector(`input[data-hospital-id="${hospitalId}"][onchange*="toggleHospitalParaFusion"]`);
+            if (checkbox) checkbox.checked = false;
+            return;
+        }
+        hospitalesParaFusionar.push(hospitalId);
+    }
+    
+    // Actualizar estado del botón de fusionar
+    actualizarEstadoBotonFusionar();
+}
+
+function actualizarEstadoBotonFusionar() {
+    const btnFusionar = document.getElementById('btnFusionar');
+    if (hospitalesParaFusionar.length === 2) {
+        btnFusionar.style.background = 'var(--sunset-coral)';
+        btnFusionar.style.color = 'white';
+        btnFusionar.innerHTML = '🔗 Fusionar 2 Hospitales Seleccionados';
+    } else {
+        btnFusionar.style.background = 'var(--ray-flower)';
+        btnFusionar.style.color = 'var(--future-dusk)';
+        btnFusionar.innerHTML = `🔗 Fusionar Hospitales (${hospitalesParaFusionar.length}/2)`;
+    }
+}
+
+function iniciarFusionHospitales() {
+    if (hospitalesParaFusionar.length !== 2) {
+        alert('⚠️ Debes seleccionar exactamente 2 hospitales para fusionar.');
+        return;
+    }
+    
+    const hospital1 = hospitales.find(h => h.id === hospitalesParaFusionar[0]);
+    const hospital2 = hospitales.find(h => h.id === hospitalesParaFusionar[1]);
+    
+    if (!hospital1 || !hospital2) {
+        alert('❌ Error: No se pudieron encontrar los hospitales seleccionados.');
+        return;
+    }
+    
+    // Mostrar modal con información de la fusión
+    mostrarModalFusion(hospital1, hospital2);
+}
+
+function mostrarModalFusion(hospital1, hospital2) {
+    // Calcular datos de la fusión
+    const poblacionTotal = (hospital1.poblacion || 0) + (hospital2.poblacion || 0);
+    const proyectosCombinados = [...new Set([...hospital1.proyectos, ...hospital2.proyectos])];
+    // Usar la cobertura AP del hospital 1 (el mismo porcentaje se aplicará a ambos)
+    const coberturaAP = hospital1.coberturaAP;
+    
+    // Nombre sugerido
+    const nombreSugerido = `${hospital1.nombre} + ${hospital2.nombre}`;
+    const codigoSugerido = `${hospital1.codigo}+${hospital2.codigo}`;
+    
+    // Llenar información en el modal
+    document.getElementById('nombreHospitalFusionado').value = nombreSugerido;
+    document.getElementById('codigoHospitalFusionado').value = codigoSugerido;
+    document.getElementById('coberturaAPFusionado').value = (coberturaAP * 100).toFixed(2);
+    document.getElementById('poblacionTotalFusion').textContent = poblacionTotal.toLocaleString();
+    document.getElementById('proyectosFusionados').textContent = proyectosCombinados.length;
+    
+    // Mostrar información detallada de los hospitales
+    const infoHtml = `
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+            <div style="border: 1px solid #e0e6ed; border-radius: 8px; padding: 15px; background: #f9fafb;">
+                <h4 style="margin: 0 0 10px 0; color: var(--future-dusk);">🏥 Hospital 1</h4>
+                <div><strong>Nombre:</strong> ${hospital1.nombre}</div>
+                <div><strong>Código:</strong> ${hospital1.codigo}</div>
+                <div><strong>Provincia:</strong> ${hospital1.provincia}</div>
+                <div><strong>ISP:</strong> ${hospital1.isp}</div>
+                <div><strong>Población:</strong> ${(hospital1.poblacion || 0).toLocaleString()}</div>
+                <div><strong>Cobertura AP:</strong> ${(hospital1.coberturaAP * 100).toFixed(2)}%</div>
+                <div><strong>Proyectos:</strong> ${hospital1.proyectos.length}</div>
+            </div>
+            <div style="border: 1px solid #e0e6ed; border-radius: 8px; padding: 15px; background: #f9fafb;">
+                <h4 style="margin: 0 0 10px 0; color: var(--future-dusk);">🏥 Hospital 2</h4>
+                <div><strong>Nombre:</strong> ${hospital2.nombre}</div>
+                <div><strong>Código:</strong> ${hospital2.codigo}</div>
+                <div><strong>Provincia:</strong> ${hospital2.provincia}</div>
+                <div><strong>ISP:</strong> ${hospital2.isp}</div>
+                <div><strong>Población:</strong> ${(hospital2.poblacion || 0).toLocaleString()}</div>
+                <div><strong>Cobertura AP:</strong> ${(hospital2.coberturaAP * 100).toFixed(2)}%</div>
+                <div><strong>Proyectos:</strong> ${hospital2.proyectos.length}</div>
+            </div>
+        </div>
+        
+        <div style="padding: 10px; background: #fff8e1; border-radius: 8px; border-left: 4px solid var(--ray-flower); margin-bottom: 15px;">
+            <strong>📊 Resultado de la fusión:</strong>
+            <ul style="margin: 5px 0; padding-left: 20px;">
+                <li>Población total: <strong>${poblacionTotal.toLocaleString()}</strong></li>
+                <li>Cobertura AP (mismo % para ambos): <strong>${(coberturaAP * 100).toFixed(2)}%</strong></li>
+                <li>Proyectos únicos combinados: <strong>${proyectosCombinados.length}</strong></li>
+                <li>ISP: <strong>${hospital1.isp}</strong></li>
+            </ul>
+        </div>
+    `;
+    
+    document.getElementById('hospitalesFusionInfo').innerHTML = infoHtml;
+    document.getElementById('fusionModal').classList.add('active');
+}
+
+function ejecutarFusionHospitales() {
+    const nombreNuevo = document.getElementById('nombreHospitalFusionado').value.trim();
+    const codigoNuevo = document.getElementById('codigoHospitalFusionado').value.trim();
+    const coberturaAPNueva = parseFloat(document.getElementById('coberturaAPFusionado').value) / 100;
+    
+    if (!nombreNuevo || !codigoNuevo) {
+        alert('⚠️ Debes completar el nombre y código del hospital fusionado.');
+        return;
+    }
+    
+    if (isNaN(coberturaAPNueva) || coberturaAPNueva < 0 || coberturaAPNueva > 1) {
+        alert('⚠️ La cobertura AP debe ser un número válido entre 0 y 100.');
+        return;
+    }
+    
+    const hospital1 = hospitales.find(h => h.id === hospitalesParaFusionar[0]);
+    const hospital2 = hospitales.find(h => h.id === hospitalesParaFusionar[1]);
+    
+    // Crear el hospital fusionado
+    const hospitalFusionado = {
+        id: hospitalIdCounter++,
+        codigo: codigoNuevo,
+        nombre: nombreNuevo,
+        provincia: hospital1.provincia, // Tomar la del primer hospital
+        ca: hospital1.ca,
+        poblacion: (hospital1.poblacion || 0) + (hospital2.poblacion || 0),
+        coberturaAP: coberturaAPNueva, // Usar la cobertura AP especificada por el usuario
+        isp: hospital1.isp, // El ISP siempre será el mismo
+        proyectos: [...new Set([...hospital1.proyectos, ...hospital2.proyectos])], // Proyectos únicos combinados
+        impactos: {}, // Los impactos se recalcularán
+        seleccionado: hospital1.seleccionado || hospital2.seleccionado, // Si alguno estaba seleccionado
+        esFusionado: true,
+        hospitalesOriginales: [
+            { nombre: hospital1.nombre, codigo: hospital1.codigo, poblacion: hospital1.poblacion },
+            { nombre: hospital2.nombre, codigo: hospital2.codigo, poblacion: hospital2.poblacion }
+        ]
+    };
+    
+    // Eliminar los hospitales originales
+    hospitales = hospitales.filter(h => h.id !== hospitalesParaFusionar[0] && h.id !== hospitalesParaFusionar[1]);
+    
+    // Agregar el hospital fusionado
+    hospitales.push(hospitalFusionado);
+    
+    // Limpiar selección de fusión
+    hospitalesParaFusionar = [];
+    actualizarEstadoBotonFusionar();
+    
+    // Actualizar tabla
+    actualizarTablaHospitales();
+    actualizarResumenes();
+    
+    // Cerrar modal
+    cerrarModalFusion();
+    
+    alert(`✅ Hospitales fusionados exitosamente.\n🏥 Nuevo hospital: "${nombreNuevo}"\n👥 Población total: ${hospitalFusionado.poblacion.toLocaleString()}\n📊 Proyectos combinados: ${hospitalFusionado.proyectos.length}\n📍 Cobertura AP: ${(coberturaAPNueva * 100).toFixed(2)}%`);
+}
+
+function cerrarModalFusion() {
+    document.getElementById('fusionModal').classList.remove('active');
+}
+
+function toggleCollapsible(contentId, iconId) {
+    const content = document.getElementById(contentId);
+    const icon = document.getElementById(iconId);
+    const header = icon.parentNode;
+
+    if (content.classList.contains('show')) {
+        content.classList.remove('show');
+        header.classList.remove('active');
+        content.style.maxHeight = '0';
+    } else {
+        content.classList.add('show');
+        header.classList.add('active');
+        const scrollHeight = content.scrollHeight;
+        content.style.maxHeight = scrollHeight + 'px';
+        
+        setTimeout(() => {
+            if (content.classList.contains('show')) {
+                content.style.maxHeight = 'none';
+            }
+        }, 500);
+    }
+}
+
+// EVENT LISTENERS
+window.addEventListener('click', function(event) {
+    if (event.target === document.getElementById('projectModal')) {
+        cerrarModal();
+    }
+    if (event.target === document.getElementById('fusionModal')) {
+        cerrarModalFusion();
+    }
+});
+
+// INICIALIZACIÓN
+document.addEventListener('DOMContentLoaded', () => {
+    actualizarTablaHospitales();
+    document.getElementById('btnImportar').disabled = false;
+    actualizarEstadoBotonFusionar();
+});
+</script>
+</body>
+</html>

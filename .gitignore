@@ -17,3 +17,6 @@ Thumbs.db
 # Backups locales
 *.bak
 *.backup
+
+# Node.js
+node_modules/

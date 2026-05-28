@@ -1442,10 +1442,10 @@ function importarHospitales() {
                 const ispStr = normalizarTexto(rawIsp);
                 const poblacion = parsearPoblacion(rawPoblacion);
 
-                if (nombre && codigo && ca && provincia && ispStr) {
-                    // Excluir hospitales sin un ISP real asignado
+                if (nombre && codigo && ca && provincia) {
+                    // Excluir hospitales sin un ISP real asignado (incluye vacío, "NO ISP", etc.)
                     if (!esISPValido(ispStr)) {
-                        hospitalesOmitidosPorISP.push({ nombre, codigo, ca, provincia, isp: ispStr });
+                        hospitalesOmitidosPorISP.push({ nombre, codigo, ca, provincia, isp: ispStr || '(vacío)' });
                         continue;
                     }
                     // Excluir hospitales con población 0 o negativa

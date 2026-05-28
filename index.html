@@ -1312,6 +1312,23 @@ function escaparHTML(valor) {
     return str.replace(/[&<>"']/g, function(c) { return mapa[c]; });
 }
 
+/**
+ * Verifica si un valor de ISP corresponde a un responsable real asignado.
+ * Retorna false para valores como "NO ISP", "Sin asignar", "N/A", etc.
+ */
+function esISPValido(valor) {
+    const isp = normalizarTexto(valor).toLowerCase().replace(/\s+/g, ' ');
+    const noValidos = new Set([
+        '', 'no isp', 'noisp', 'sin isp', 'sinisp',
+        'sin asignar', 'sinasignar',
+        'pendiente',
+        'n/a', 'na',
+        'no aplica', 'noaplica',
+        '-', '--'
+    ]);
+    return !noValidos.has(isp);
+}
+
 // Variables para colores dinámicos
 let ispColors = {};
 let ccaaColors = {};
@@ -1408,6 +1425,7 @@ function importarHospitales() {
             let totalHospitales = 0;
             const ispsEncontrados = {};
             const hospitalesOmitidosPorPoblacion0 = [];
+            const hospitalesOmitidosPorISP = [];
 
             for (let row = 1; row <= range.e.r; row++) {
                 const rawCodigo = worksheet[XLSX.utils.encode_cell({r: row, c: 0})]?.v;
@@ -1425,6 +1443,11 @@ function importarHospitales() {
                 const poblacion = parsearPoblacion(rawPoblacion);
 
                 if (nombre && codigo && ca && provincia && ispStr) {
+                    // Excluir hospitales sin un ISP real asignado
+                    if (!esISPValido(ispStr)) {
+                        hospitalesOmitidosPorISP.push({ nombre, codigo, ca, provincia, isp: ispStr });
+                        continue;
+                    }
                     // Excluir hospitales con población 0 o negativa
                     if (poblacion <= 0) {
                         hospitalesOmitidosPorPoblacion0.push({ nombre, codigo, ca, provincia, isp: ispStr });
@@ -1457,6 +1480,9 @@ function importarHospitales() {
             if (hospitalesOmitidosPorPoblacion0.length > 0) {
                 statusMessage += ` | ${hospitalesOmitidosPorPoblacion0.length} omitidos por población 0`;
             }
+            if (hospitalesOmitidosPorISP.length > 0) {
+                statusMessage += ` | ${hospitalesOmitidosPorISP.length} omitidos por ISP no asignado`;
+            }
             const ispList = Object.entries(ispsEncontrados).map(([isp, count]) => `${escaparHTML(isp)}: ${count}`).join(', ');
             if (ispList) statusMessage += `<br><small>${ispList}</small>`;
             
@@ -1465,6 +1491,9 @@ function importarHospitales() {
             // Advertencia en consola con listado de omitidos para depuración
             if (hospitalesOmitidosPorPoblacion0.length > 0) {
                 console.warn('Hospitales omitidos por población 0:', hospitalesOmitidosPorPoblacion0);
+            }
+            if (hospitalesOmitidosPorISP.length > 0) {
+                console.warn('Hospitales omitidos por ISP no asignado:', hospitalesOmitidosPorISP);
             }
 
             // Poblar selectores dinámicos
@@ -1572,7 +1601,7 @@ function extraerParametrosDeHoja(worksheet) {
 function poblarSelectores() {
     if (!baseDatosImportada.length) return;
 
-    const ispSet = [...new Set(baseDatosImportada.map(h => h.isp))].sort();
+    const ispSet = [...new Set(baseDatosImportada.map(h => h.isp).filter(esISPValido))].sort();
     const ccaaSet = [...new Set(baseDatosImportada.map(h => h.ca))].sort();
     const provinciaSet = [...new Set(baseDatosImportada.map(h => h.provincia))].sort();
 
@@ -3067,10 +3096,20 @@ function procesarArchivoJSON() {
 
             hospitales = [];
             hospitalIdCounter = 1;
+            let hospitalesOmitidosPorISPJSON = [];
 
             territorioActual = data.territorio || 'Importado desde JSON';
             
             data.hospitales.forEach(hospitalData => {
+                // Excluir hospitales sin ISP real asignado
+                if (!esISPValido(hospitalData.isp)) {
+                    hospitalesOmitidosPorISPJSON.push({
+                        nombre: hospitalData.nombre,
+                        codigo: hospitalData.codigo,
+                        isp: hospitalData.isp
+                    });
+                    return;
+                }
                 const hospital = {
                     id: hospitalIdCounter++,
                     codigo: hospitalData.codigo,
@@ -3119,7 +3158,12 @@ function procesarArchivoJSON() {
             actualizarResumenes();
             habilitarControles();
 
-            alert(`✅ JSON importado correctamente.\n🏥 ${hospitales.length} hospitales cargados.\n📊 Territorio: ${territorioActual}\n🔄 Los filtros se han actualizado con los datos del JSON. Puedes filtrar sin perder proyectos/cálculos importados.`);
+            let alertMsg = `✅ JSON importado correctamente.\n🏥 ${hospitales.length} hospitales cargados.\n📊 Territorio: ${territorioActual}`;
+            if (hospitalesOmitidosPorISPJSON.length > 0) {
+                alertMsg += `\n⚠️ ${hospitalesOmitidosPorISPJSON.length} hospitales omitidos por ISP no asignado.`;
+            }
+            alertMsg += `\n🔄 Los filtros se han actualizado con los datos del JSON. Puedes filtrar sin perder proyectos/cálculos importados.`;
+            alert(alertMsg);
 
         } catch (error) {
             console.error('Error al importar JSON:', error);

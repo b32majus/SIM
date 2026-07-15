@@ -980,7 +980,7 @@
 
         <div class="section" id="resumenHospitalesSection" style="display: none;">
             <div class="collapsible-header" id="headerResumenPorHospital" onclick="toggleCollapsible('resumenPorHospitalContent', 'iconResumenPorHospital')">
-                <h3>🏥 Resumen de Impacto - Por Hospital</h3>
+                <h3>🏥 Outputs de proyectos por hospital</h3>
                 <span class="collapsible-icon" id="iconResumenPorHospital">▶</span>
             </div>
             <div class="collapsible-content" id="resumenPorHospitalContent">
@@ -1930,7 +1930,7 @@ function renderizarResumenProyectoSimV2(proyectoId, resumen) {
     if (resumen.cosentyxVisible) {
         cosentyxHtml = `
             <div class="impact-metric">
-                <span class="impact-metric-label">Total pacientes Cosentyx</span>
+                <span class="impact-metric-label">Pacientes Cosentyx (según market share)</span>
                 <span class="impact-metric-value">${formatearNumeroSim(resumen.totalPacientesCosentyx)}</span>
             </div>
             <div class="impact-metric">
@@ -1955,7 +1955,7 @@ function renderizarResumenProyectoSimV2(proyectoId, resumen) {
     if (resumen.hospitalesCalculados === 0 && resumen.hospitalesAsignados > 0) {
         notaCalculo = `
             <div style="margin-top: 6px; font-size: 11px; color: #6b7280; font-style: italic;">
-                Calcula impactos para ver el resumen agregado del proyecto.
+                Calcula impactos para ver el resumen del proyecto.
             </div>
         `;
     }
@@ -2128,7 +2128,7 @@ function generarFichaProyectoHtml(proyectoId) {
     let resumenCosentyx = '';
     if (resumen.cosentyxVisible) {
         resumenCosentyx = `
-            <div class="fila"><span class="etiqueta">Total pacientes Cosentyx:</span> <span class="valor">${formatearNumeroSim(resumen.totalPacientesCosentyx)}</span></div>
+            <div class="fila"><span class="etiqueta">Pacientes Cosentyx (según market share):</span> <span class="valor">${formatearNumeroSim(resumen.totalPacientesCosentyx)}</span></div>
             <div class="fila"><span class="etiqueta">Share local aplicado en:</span> <span class="valor">${formatearNumeroSim(resumen.hospitalesShareLocal)} hospital${resumen.hospitalesShareLocal === 1 ? '' : 'es'}</span></div>
             <div class="fila"><span class="etiqueta">Share nacional/default en:</span> <span class="valor">${formatearNumeroSim(resumen.hospitalesShareNacional)} hospital${resumen.hospitalesShareNacional === 1 ? '' : 'es'}</span></div>
         `;
@@ -2139,7 +2139,7 @@ function generarFichaProyectoHtml(proyectoId) {
     }
 
     const notaCalculo = (resumen.hospitalesCalculados === 0 && resumen.hospitalesAsignados > 0)
-        ? '<div class="nota-calculo">Calcula impactos para ver el resumen agregado del proyecto.</div>'
+        ? '<div class="nota-calculo">Calcula impactos para ver el resumen del proyecto.</div>'
         : '';
 
     const hospitalesHtml = hospitalesConProyecto.map(renderHospitalFicha).join('');
@@ -3539,6 +3539,7 @@ function mostrarResumenPorProyecto(proyectoStats, totalHospitales, totalPoblacio
     Object.keys(proyectoStats).forEach(proyectoId => {
         const stats = proyectoStats[proyectoId];
         const proyecto = stats.proyecto;
+        const safeProyectoId = escaparHTML(JSON.stringify(proyectoId));
 
         let hospitalesAsignadosHtml = '<div style="display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px;">';
         if (stats.hospitales.length > 0) {
@@ -3564,7 +3565,7 @@ function mostrarResumenPorProyecto(proyectoStats, totalHospitales, totalPoblacio
                 ? formatearNumeroSim(resumenSimV2.totalPacientesCosentyx)
                 : 'No calculado';
             cosentyxLinea = `<div class="impact-metric">
-                    <span class="impact-metric-label">Cosentyx estimado interno</span>
+                    <span class="impact-metric-label">Pacientes Cosentyx (según market share)</span>
                     <span class="impact-metric-value">${cosentyxValor}</span>
                 </div>`;
         } else {
@@ -3575,7 +3576,7 @@ function mostrarResumenPorProyecto(proyectoStats, totalHospitales, totalPoblacio
         }
 
         html += `
-            <div class="impact-card" style="border-left: 4px solid ${proyecto.color}; cursor: pointer;" onclick="abrirDetalleProyecto('${proyectoId}')">
+            <div class="impact-card" style="border-left: 4px solid ${proyecto.color}; cursor: pointer;" onclick="abrirDetalleProyecto(${safeProyectoId})">
                 <h4 style="color: ${proyecto.color};">${proyecto.nombre}</h4>
                 <div class="impact-metric">
                     <span class="impact-metric-label">Hospitales asignados</span>
@@ -3591,7 +3592,7 @@ function mostrarResumenPorProyecto(proyectoStats, totalHospitales, totalPoblacio
                 <div style="margin-top: 8px; padding: 8px; background: #f0f9ff; border-radius: 6px; border: 1px solid #bae6fd;">
                     <div style="font-size: 11px; font-weight: 600; color: #0c4a6e; margin-bottom: 6px;">Dato HISTRACK del proyecto</div>
                     <div class="impact-metric">
-                        <span class="impact-metric-label">Output HISTRACK</span>
+                        <span class="impact-metric-label">Output HISTRACK del proyecto</span>
                         <span class="impact-metric-value" style="font-size: 11px;">${escaparHTML(outputLabel)}</span>
                     </div>
                     <div class="impact-metric">
@@ -3599,7 +3600,7 @@ function mostrarResumenPorProyecto(proyectoStats, totalHospitales, totalPoblacio
                         <span class="impact-metric-value" style="color: var(--aquatic-awe); font-weight: 700;">${impactoValor}</span>
                     </div>
                     <div class="impact-metric">
-                        <span class="impact-metric-label">Calculados</span>
+                        <span class="impact-metric-label">Hospitales calculados</span>
                         <span class="impact-metric-value">${calculadosFmt}</span>
                     </div>
                     ${cosentyxLinea}
@@ -4191,7 +4192,7 @@ function exportarResumenHTML() {
     <h2 class="section-title">🎯 Resumen de Impacto - Por Proyecto</h2>
     ${resumenProyectos}
 
-    <h2 class="section-title">🏥 Resumen de Impacto - Por Hospital</h2>
+    <h2 class="section-title">🏥 Outputs de proyectos por hospital</h2>
     ${resumenHospitales}
 
     <h2 class="section-title">📌 Resumen Consolidado de Impacto</h2>
@@ -4380,7 +4381,7 @@ function abrirDetalleProyecto(proyectoId) {
         `;
     }
 
-    // Resumen agregado SIM v2
+    // Resumen del proyecto SIM v2
     const resumenSimV2 = calcularResumenProyectoSimV2(proyectoId);
     const resumenSimV2Html = renderizarResumenProyectoSimV2(proyectoId, resumenSimV2);
 

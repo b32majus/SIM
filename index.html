@@ -1911,6 +1911,277 @@ function renderizarResumenProyectoSimV2(proyectoId, resumen) {
     `;
 }
 
+// ===== HELPERS SIM v2 — ficha de proyecto imprimible/descargable =====
+
+/**
+ * Devuelve fecha actual en formato español corto DD/MM/YYYY.
+ */
+function getFechaSimV2() {
+    const ahora = new Date();
+    const dia = String(ahora.getDate()).padStart(2, '0');
+    const mes = String(ahora.getMonth() + 1).padStart(2, '0');
+    const anio = ahora.getFullYear();
+    return dia + '/' + mes + '/' + anio;
+}
+
+/**
+ * Devuelve fecha actual en formato compacto YYYYMMDD para nombres de archivo.
+ */
+function getFechaArchivoSimV2() {
+    const ahora = new Date();
+    const dia = String(ahora.getDate()).padStart(2, '0');
+    const mes = String(ahora.getMonth() + 1).padStart(2, '0');
+    const anio = ahora.getFullYear();
+    return anio + mes + dia;
+}
+
+/**
+ * Normaliza un texto para usarlo como slug de archivo.
+ */
+function crearSlugArchivoSim(texto) {
+    if (!texto) return 'proyecto';
+    var slug = String(texto).toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9\s-]/g, '')
+        .trim()
+        .replace(/\s+/g, '-');
+    return slug || 'proyecto';
+}
+
+/**
+ * Devuelve hospitales seleccionados asignados a un proyecto.
+ */
+function getHospitalesProyectoSeleccionados(proyectoId) {
+    return hospitales.filter(function(h) {
+        return h.seleccionado && h.proyectos && h.proyectos.includes(proyectoId);
+    });
+}
+
+/**
+ * Genera HTML standalone completo de la ficha SIM v2 de un proyecto.
+ */
+function generarFichaProyectoHtml(proyectoId) {
+    const proyecto = proyectos[proyectoId];
+    if (!proyecto) return '<!DOCTYPE html><html><body>Proyecto no encontrado</body></html>';
+
+    const config = getConfigProyecto(proyectoId);
+    const resumen = calcularResumenProyectoSimV2(proyectoId);
+    const hospitalesConProyecto = getHospitalesProyectoSeleccionados(proyectoId);
+    const fecha = getFechaSimV2();
+    const territorio = escaparHTML(territorioActual || 'territorio seleccionado');
+    const narrativa = getNarrativaProyecto(proyectoId);
+
+    // Helper para tarjeta de hospital en ficha
+    function renderHospitalFicha(hospital) {
+        const impacto = hospital.impactos && hospital.impactos[proyectoId];
+        const histrackValor = getHistrackValorDesdeImpacto(proyectoId, impacto);
+        const histrackLabel = (impacto && impacto.histrackLabel) ? impacto.histrackLabel : getOutputHistrackLabel(proyectoId);
+
+        let cosentyxFicha = '';
+        if (config && config.cosentyxVisible) {
+            const shareAplicado = (impacto && typeof impacto.shareCosentyxAplicado === 'number')
+                ? impacto.shareCosentyxAplicado
+                : getShareCosentyxAplicado(hospital, proyectoId);
+            const shareOrigen = (impacto && impacto.shareCosentyxOrigen)
+                ? impacto.shareCosentyxOrigen
+                : ((getShareCosentyxOverride(hospital, proyectoId) !== undefined) ? 'local' : 'nacional');
+            const pacCos = (impacto && typeof impacto.pacientesCosentyx === 'number')
+                ? formatearNumeroSim(impacto.pacientesCosentyx)
+                : 'No calculado';
+            cosentyxFicha = `
+                <div class="fila"><span class="etiqueta">Share Cosentyx aplicado:</span> <span class="valor">${formatearPorcentajeSim(shareAplicado)} (${escaparHTML(shareOrigen)})</span></div>
+                <div class="fila"><span class="etiqueta">Pacientes Cosentyx:</span> <span class="valor">${pacCos}</span></div>
+            `;
+        } else {
+            cosentyxFicha = `
+                <div class="fila"><span class="etiqueta">Cosentyx:</span> <span class="valor desactivado">No visible como output en esta fase</span></div>
+            `;
+        }
+
+        let lecturaHtml = '';
+        if (narrativa) {
+            const ctx = construirContextoNarrativa(proyectoId, hospital, impacto);
+            lecturaHtml = `
+                <div class="narrativa-ficha">
+                    <div class="narrativa-titulo">📖 Lectura ejecutiva</div>
+                    <p>${renderizarPlantillaNarrativa(narrativa.resumenEjecutivo, ctx)}</p>
+                    <p>${renderizarPlantillaNarrativa(narrativa.lecturaHistrack, ctx)}</p>
+                    <p>${renderizarPlantillaNarrativa(narrativa.lecturaCosentyx, ctx)}</p>
+                </div>
+            `;
+        }
+
+        return `
+            <div class="tarjeta-hospital">
+                <div class="hospital-nombre">${escaparHTML(hospital.nombre)}</div>
+                <div class="fila"><span class="etiqueta">ISP:</span> <span class="valor">${escaparHTML(hospital.isp)}</span></div>
+                <div class="fila"><span class="etiqueta">Provincia:</span> <span class="valor">${escaparHTML(hospital.provincia)}</span></div>
+                <div class="fila"><span class="etiqueta">Población:</span> <span class="valor">${formatearNumeroSim(hospital.poblacion)}</span></div>
+                <div class="fila"><span class="etiqueta">Cobertura AP:</span> <span class="valor">${(hospital.coberturaAP * 100).toFixed(2)}%</span></div>
+                <div class="fila"><span class="etiqueta">Output HISTRACK:</span> <span class="valor">${escaparHTML(histrackLabel)} = ${typeof histrackValor === 'number' ? formatearNumeroSim(histrackValor) : 'No calculado'}</span></div>
+                ${cosentyxFicha}
+                ${lecturaHtml}
+            </div>
+        `;
+    }
+
+    // Metodología
+    let metodologiaFicha = '';
+    if (config) {
+        const shareLabel = config.cosentyxVisible ? 'Share Cosentyx default' : 'Share Cosentyx';
+        const shareValue = config.cosentyxVisible
+            ? formatearPorcentajeSim(config.shareCosentyxDefault)
+            : 'No aplica como output visible';
+        const visibilidad = config.cosentyxVisible
+            ? 'Visible como capa interna/comercial'
+            : 'No visible en esta fase';
+        metodologiaFicha = `
+            <div class="tarjeta">
+                <div class="tarjeta-titulo">Metodología SIM v2</div>
+                <div class="fila"><span class="etiqueta">Output HISTRACK:</span> <span class="valor">${escaparHTML(config.outputHistrack)}</span></div>
+                <div class="fila"><span class="etiqueta">Tipo:</span> <span class="valor">${escaparHTML(config.etiquetaTipo)}</span></div>
+                <div class="fila"><span class="etiqueta">Origen:</span> <span class="valor">${escaparHTML(config.etiquetaOrigen)}</span></div>
+                <div class="fila"><span class="etiqueta">${escaparHTML(shareLabel)}:</span> <span class="valor">${escaparHTML(shareValue)}</span></div>
+                <div class="fila"><span class="etiqueta">Visibilidad Cosentyx:</span> <span class="valor">${escaparHTML(visibilidad)}</span></div>
+                <div class="fila"><span class="etiqueta">Descripción metodológica:</span> <span class="valor descripcion">${escaparHTML(config.descripcionMetodologica)}</span></div>
+            </div>
+        `;
+    }
+
+    // Resumen
+    let resumenCosentyx = '';
+    if (resumen.cosentyxVisible) {
+        resumenCosentyx = `
+            <div class="fila"><span class="etiqueta">Total pacientes Cosentyx:</span> <span class="valor">${formatearNumeroSim(resumen.totalPacientesCosentyx)}</span></div>
+            <div class="fila"><span class="etiqueta">Share local aplicado en:</span> <span class="valor">${formatearNumeroSim(resumen.hospitalesShareLocal)} hospital${resumen.hospitalesShareLocal === 1 ? '' : 'es'}</span></div>
+            <div class="fila"><span class="etiqueta">Share nacional/default en:</span> <span class="valor">${formatearNumeroSim(resumen.hospitalesShareNacional)} hospital${resumen.hospitalesShareNacional === 1 ? '' : 'es'}</span></div>
+        `;
+    } else {
+        resumenCosentyx = `
+            <div class="fila"><span class="etiqueta">Cosentyx:</span> <span class="valor desactivado">No visible como output en esta fase</span></div>
+        `;
+    }
+
+    const notaCalculo = (resumen.hospitalesCalculados === 0 && resumen.hospitalesAsignados > 0)
+        ? '<div class="nota-calculo">Calcula impactos para ver el resumen agregado del proyecto.</div>'
+        : '';
+
+    const hospitalesHtml = hospitalesConProyecto.map(renderHospitalFicha).join('');
+
+    return `<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ficha SIM v2 — ${escaparHTML(proyecto.nombre)}</title>
+<style>
+    * { box-sizing: border-box; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 24px; background: #fff; color: #1f2937; line-height: 1.5; }
+    .cabecera { border-bottom: 2px solid #1e40af; padding-bottom: 16px; margin-bottom: 24px; }
+    .cabecera h1 { margin: 0 0 6px; font-size: 22px; color: #1e3a8a; }
+    .cabecera .sub { font-size: 13px; color: #4b5563; }
+    .cabecera .nota { font-size: 11px; color: #6b7280; margin-top: 8px; font-style: italic; }
+    .tarjeta { border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin-bottom: 20px; page-break-inside: avoid; }
+    .tarjeta-titulo { font-size: 15px; font-weight: 600; color: #1e3a8a; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid #e5e7eb; }
+    .fila { display: flex; justify-content: space-between; padding: 4px 0; font-size: 12px; border-bottom: 1px solid #f3f4f6; }
+    .fila:last-child { border-bottom: none; }
+    .etiqueta { color: #4b5563; font-weight: 500; }
+    .valor { color: #1f2937; font-weight: 600; text-align: right; max-width: 60%; }
+    .valor.descripcion { font-weight: 400; text-align: left; max-width: 100%; margin-top: 4px; white-space: pre-line; }
+    .valor.desactivado { color: #9ca3af; font-weight: 400; }
+    .tarjeta-hospital { border: 1px solid #e5e7eb; border-radius: 8px; padding: 14px; margin-bottom: 14px; page-break-inside: avoid; background: #fafafa; }
+    .hospital-nombre { font-size: 14px; font-weight: 600; color: #1e3a8a; margin-bottom: 8px; }
+    .narrativa-ficha { margin-top: 10px; padding: 10px; background: #f8fafc; border-radius: 6px; border-left: 3px solid #3b82f6; }
+    .narrativa-titulo { font-size: 12px; font-weight: 600; color: #1e40af; margin-bottom: 6px; }
+    .narrativa-ficha p { margin: 0 0 6px; font-size: 12px; color: #374151; line-height: 1.5; }
+    .narrativa-ficha p:last-child { margin-bottom: 0; }
+    .nota-calculo { font-size: 11px; color: #6b7280; font-style: italic; margin-top: 8px; }
+    .pie { margin-top: 30px; padding-top: 12px; border-top: 1px solid #e5e7eb; font-size: 11px; color: #9ca3af; text-align: center; }
+    .acciones { text-align: center; margin-bottom: 20px; }
+    .acciones button { padding: 8px 16px; font-size: 13px; background: #1e40af; color: #fff; border: none; border-radius: 6px; cursor: pointer; margin: 0 4px; }
+    .acciones button:hover { background: #1e3a8a; }
+    @media print {
+        .acciones { display: none; }
+        body { padding: 12px; }
+        .tarjeta, .tarjeta-hospital { page-break-inside: avoid; break-inside: avoid; }
+    }
+</style>
+</head>
+<body>
+    <div class="acciones">
+        <button onclick="window.print()">🖨️ Imprimir / Guardar PDF</button>
+        <button onclick="window.close()">❌ Cerrar</button>
+    </div>
+    <div class="cabecera">
+        <h1>Ficha SIM v2 — ${escaparHTML(proyecto.nombre)}</h1>
+        <div class="sub">Territorio: ${territorio} · Fecha: ${fecha}</div>
+        <div class="nota">Ficha generada localmente desde SIM v2. Los resultados dependen de los hospitales seleccionados y de los impactos calculados en la sesión.</div>
+    </div>
+    <div class="tarjeta">
+        <div class="tarjeta-titulo">Información del Proyecto</div>
+        <div class="fila"><span class="etiqueta">Área terapéutica:</span> <span class="valor">${escaparHTML(proyecto.area)}</span></div>
+        <div class="fila"><span class="etiqueta">Descripción:</span> <span class="valor">${escaparHTML(proyecto.descripcion)}</span></div>
+        <div class="fila"><span class="etiqueta">Hospitales asignados (seleccionados):</span> <span class="valor">${formatearNumeroSim(hospitalesConProyecto.length)}</span></div>
+    </div>
+    ${metodologiaFicha}
+    <div class="tarjeta">
+        <div class="tarjeta-titulo">Resumen agregado SIM v2</div>
+        <div class="fila"><span class="etiqueta">Hospitales asignados:</span> <span class="valor">${formatearNumeroSim(resumen.hospitalesAsignados)}</span></div>
+        <div class="fila"><span class="etiqueta">Hospitales calculados:</span> <span class="valor">${formatearNumeroSim(resumen.hospitalesCalculados)}</span></div>
+        <div class="fila"><span class="etiqueta">Pendientes de cálculo:</span> <span class="valor">${formatearNumeroSim(resumen.hospitalesSinCalculo)}</span></div>
+        <div class="fila"><span class="etiqueta">Output HISTRACK:</span> <span class="valor">${escaparHTML(resumen.histrackLabel)}</span></div>
+        <div class="fila"><span class="etiqueta">Total HISTRACK:</span> <span class="valor">${formatearNumeroSim(resumen.totalHistrack)}</span></div>
+        ${resumenCosentyx}
+        ${notaCalculo}
+    </div>
+    <div class="tarjeta">
+        <div class="tarjeta-titulo">Detalle por hospital</div>
+        ${hospitalesHtml}
+    </div>
+    <div class="pie">SIM v2 · Uso interno · Resultados orientativos sujetos a validación metodológica</div>
+</body>
+</html>`;
+}
+
+/**
+ * Abre la ficha SIM v2 en una nueva ventana para imprimir.
+ */
+function imprimirFichaProyectoSimV2(proyectoId) {
+    const html = generarFichaProyectoHtml(proyectoId);
+    const ventana = window.open('', '_blank');
+    if (!ventana) {
+        alert('⚠️ No se pudo abrir la vista imprimible. Revisa el bloqueo de ventanas emergentes.');
+        return;
+    }
+    ventana.document.open();
+    ventana.document.write(html);
+    ventana.document.close();
+    ventana.focus();
+    setTimeout(function() {
+        ventana.print();
+    }, 500);
+}
+
+/**
+ * Descarga la ficha SIM v2 como archivo HTML standalone.
+ */
+function descargarFichaProyectoSimV2(proyectoId) {
+    const proyecto = proyectos[proyectoId];
+    if (!proyecto) return;
+    const html = generarFichaProyectoHtml(proyectoId);
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const slug = crearSlugArchivoSim(proyecto.nombre);
+    const fecha = getFechaArchivoSimV2();
+    a.href = url;
+    a.download = 'sim-v2-' + slug + '-' + fecha + '.html';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+}
+
 // ===== HELPERS SIM v2 — parámetros y enriquecimiento =====
 
 /**
@@ -3925,6 +4196,8 @@ function abrirDetalleProyecto(proyectoId) {
     const resumenSimV2 = calcularResumenProyectoSimV2(proyectoId);
     const resumenSimV2Html = renderizarResumenProyectoSimV2(proyectoId, resumenSimV2);
 
+    const safeProyectoIdBotones = escaparHTML(JSON.stringify(proyectoId));
+
     let contenidoHtml = `
         <div class="impact-card">
             <h4>Información del Proyecto</h4>
@@ -3939,6 +4212,18 @@ function abrirDetalleProyecto(proyectoId) {
             <div class="impact-metric">
                 <span class="impact-metric-label">Hospitales asignados (seleccionados)</span>
                 <span class="impact-metric-value">${hospitalesConProyecto.length}</span>
+            </div>
+            <div style="margin-top: 12px; display: flex; gap: 8px;">
+                <button type="button"
+                    onclick="imprimirFichaProyectoSimV2(${safeProyectoIdBotones})"
+                    style="padding: 4px 10px; font-size: 12px; background: var(--aquatic-awe); color: #fff; border: none; border-radius: 4px; cursor: pointer;">
+                    🖨️ Imprimir / Guardar PDF
+                </button>
+                <button type="button"
+                    onclick="descargarFichaProyectoSimV2(${safeProyectoIdBotones})"
+                    style="padding: 4px 10px; font-size: 12px; background: #f3f4f6; color: #374151; border: 1px solid #d1d5db; border-radius: 4px; cursor: pointer;">
+                    ⬇️ Descargar ficha HTML
+                </button>
             </div>
         </div>
         ${metodologiaHtml}

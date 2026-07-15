@@ -942,12 +942,13 @@
                         </div>
                     </th> 
                     <th>Proyectos Asignados</th>
+                    <th>SIM v2</th>
                     <th>Estado Cálculo</th>
                 </tr>
                 </thead>
                 <tbody id="hospitalTableBody">
                 <tr>
-                    <td class="empty-state" colspan="10"> Importa la base de datos para cargar hospitales
+                    <td class="empty-state" colspan="11"> Importa la base de datos para cargar hospitales
                     </td>
                 </tr>
                 </tbody>
@@ -2182,6 +2183,98 @@ function descargarFichaProyectoSimV2(proyectoId) {
     URL.revokeObjectURL(url);
 }
 
+// ===== HELPERS SIM v2 — resumen compacto por hospital =====
+
+/**
+ * Calcula resumen SIM v2 agregado por hospital sobre todos sus proyectos.
+ * No muta hospital ni recalcula impactos.
+ */
+function calcularResumenHospitalSimV2(hospital) {
+    const proyectos = hospital.proyectos || [];
+    let proyectosAsignados = proyectos.length;
+    let proyectosCalculados = 0;
+    let proyectosPendientes = 0;
+    let totalHistrack = 0;
+    let totalPacientesCosentyx = 0;
+    let overridesLocales = 0;
+    let tieneErrores = false;
+
+    proyectos.forEach(function(proyectoId) {
+        const impacto = hospital.impactos && hospital.impactos[proyectoId];
+        const config = getConfigProyecto(proyectoId);
+
+        if (impacto && !impacto.error) {
+            proyectosCalculados++;
+            const histrackValor = getHistrackValorDesdeImpacto(proyectoId, impacto);
+            if (typeof histrackValor === 'number') {
+                totalHistrack += histrackValor;
+            }
+            if (config && config.cosentyxVisible && typeof impacto.pacientesCosentyx === 'number') {
+                totalPacientesCosentyx += impacto.pacientesCosentyx;
+            }
+        } else if (impacto && impacto.error) {
+            tieneErrores = true;
+            proyectosPendientes++;
+        } else {
+            proyectosPendientes++;
+        }
+
+        if (getShareCosentyxOverride(hospital, proyectoId) !== undefined) {
+            overridesLocales++;
+        }
+    });
+
+    return {
+        proyectosAsignados: proyectosAsignados,
+        proyectosCalculados: proyectosCalculados,
+        proyectosPendientes: proyectosPendientes,
+        totalHistrack: totalHistrack,
+        totalPacientesCosentyx: totalPacientesCosentyx,
+        overridesLocales: overridesLocales,
+        tieneErrores: tieneErrores
+    };
+}
+
+/**
+ * Renderiza HTML compacto de resumen SIM v2 para una celda de tabla.
+ */
+function renderizarResumenHospitalSimV2(hospital) {
+    const resumen = calcularResumenHospitalSimV2(hospital);
+
+    if (resumen.proyectosAsignados === 0) {
+        return '<span style="font-size:11px;color:#9ca3af;">Sin proyectos</span>';
+    }
+
+    let lineas = [];
+
+    // Calculados / asignados
+    lineas.push('<span style="font-size:11px;color:#374151;">' + resumen.proyectosCalculados + '/' + resumen.proyectosAsignados + ' calculados</span>');
+
+    // HISTRACK
+    lineas.push('<span style="font-size:11px;color:#1e3a8a;font-weight:600;">HISTRACK: ' + formatearNumeroSim(resumen.totalHistrack) + '</span>');
+
+    // Cosentyx visible (solo si > 0)
+    if (resumen.totalPacientesCosentyx > 0) {
+        lineas.push('<span style="font-size:11px;color:#047857;font-weight:600;">Cosentyx: ' + formatearNumeroSim(resumen.totalPacientesCosentyx) + '</span>');
+    }
+
+    // Share local
+    if (resumen.overridesLocales > 0) {
+        lineas.push('<span style="font-size:11px;color:#b45309;">Share local: ' + resumen.overridesLocales + '</span>');
+    }
+
+    // Badges
+    let badges = [];
+    if (resumen.proyectosPendientes > 0) {
+        badges.push('<span style="display:inline-block;padding:1px 5px;font-size:9px;border-radius:3px;background:#fef3c7;color:#92400e;margin-right:3px;">pendiente</span>');
+    }
+    if (resumen.tieneErrores) {
+        badges.push('<span style="display:inline-block;padding:1px 5px;font-size:9px;border-radius:3px;background:#fee2e2;color:#991b1b;margin-right:3px;">error</span>');
+    }
+
+    return lineas.join('<br>') + (badges.length ? '<div style="margin-top:3px;">' + badges.join('') + '</div>' : '');
+}
+
 // ===== HELPERS SIM v2 — parámetros y enriquecimiento =====
 
 /**
@@ -3158,7 +3251,7 @@ function actualizarTablaHospitales() {
     if (hospitales.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="10" class="empty-state"> Importa la base de datos para cargar hospitales
+                <td colspan="11" class="empty-state"> Importa la base de datos para cargar hospitales
                 </td>
             </tr>
         `;
@@ -3285,6 +3378,7 @@ function actualizarTablaHospitales() {
                        onchange="updateCoberturaAP(${hospital.id}, this.value)">
             </td>
             <td class="proyecto-tags" id="proyectos-cell-${hospital.id}"></td>
+            <td>${renderizarResumenHospitalSimV2(hospital)}</td>
             <td>${estadoCalculo}</td>
         `;
 

@@ -1487,55 +1487,101 @@ const PLACEHOLDERS_NARRATIVA = [
     "share_cosentyx"
 ];
 
-// Narrativas limpias por proyecto (SIM v2)
+// Narrativas aprobadas por proyecto (SIM v2)
+// Cada proyecto tiene: textoAprobado + metricasAprobadas[]
 const NARRATIVA_PROYECTOS_SIM_V2 = {
     "HS-Connect-AP ": {
-        tituloNarrativo: "Conexión AP-Dermatología para HS",
-        resumenEjecutivo: "El proyecto conecta Atención Primaria con Dermatología para reducir el infradiagnóstico de Hidradenitis Supurativa y acelerar la identificación de pacientes moderado-graves candidatos a circuito especializado.",
-        lecturaHistrack: "En {hospital}, la contribución estimada al proyecto es de {impacto_histrack} pacientes asociados al impacto nuevos pacientes diagnosticados ({histrack_label}).",
-        lecturaCosentyx: "Aplicando un share Cosentyx del {share_cosentyx}, se estiman {pacientes_cosentyx} pacientes candidatos a Cosentyx derivados de ese diagnóstico."
+        tituloNarrativo: "HSConnect-AP",
+        textoAprobado: "Con el Proyecto HSConnect-AP, establecemos rutas asistenciales entre Dermatología y Atención Primaria, aumentando y acelerando la derivación de pacientes moderados-severos al servicio de Dermatología y, por ende, incrementando el número de pacientes diagnosticados candidatos a recibir tratamiento biológico, lo que se traduce en más pacientes candidatos a Cosentyx.",
+        metricasAprobadas: function(ctx) {
+            var lineas = [];
+            lineas.push('Incremento ' + ctx.impacto_histrack + ' pacientes diagnosticados');
+            if (ctx.pacientes_cosentyx !== 'No calculado') {
+                lineas.push(ctx.pacientes_cosentyx + ' pacientes tratados con Cosentyx (según market share)');
+            }
+            return lineas;
+        }
     },
     "HS-Connect Intra": {
-        tituloNarrativo: "Conexión Intrahospitalaria para HS",
-        resumenEjecutivo: "El proyecto expande el diagnóstico de HS dentro del ámbito hospitalario (Dermatología, Cirugía, Urgencias), reduciendo la latencia entre primera consulta y diagnóstico formal.",
-        lecturaHistrack: "En {hospital}, la contribución estimada al proyecto es de {impacto_histrack} pacientes asociados al impacto nuevos pacientes diagnosticados intrahospitalariamente ({histrack_label}).",
-        lecturaCosentyx: "Aplicando un share Cosentyx del {share_cosentyx}, se estiman {pacientes_cosentyx} pacientes candidatos a Cosentyx derivados de ese diagnóstico."
+        tituloNarrativo: "HSConnect-Intra",
+        textoAprobado: null,
+        textoPendiente: "Narrativa interna pendiente de validar para HSConnect-Intra.",
+        metricasAprobadas: function(ctx) {
+            var lineas = [];
+            lineas.push('Incremento ' + ctx.impacto_histrack + ' pacientes diagnosticados');
+            if (ctx.pacientes_cosentyx !== 'No calculado') {
+                lineas.push(ctx.pacientes_cosentyx + ' pacientes tratados con Cosentyx (según market share)');
+            }
+            return lineas;
+        }
     },
     "HS-Efficiency": {
-        tituloNarrativo: "Capacidad asistencial en Dermatología para HS",
-        resumenEjecutivo: "El proyecto genera capacidad asistencial en Dermatología y traduce esa capacidad en incremento de pacientes HS Hurley II-III tratados o candidatos a tratamiento.",
-        lecturaHistrack: "En {hospital}, la contribución estimada al proyecto es de {impacto_histrack} pacientes asociados al impacto pacientes adicionales ({histrack_label}).",
-        lecturaCosentyx: "Aplicando un share Cosentyx del {share_cosentyx}, se estiman {pacientes_cosentyx} pacientes candidatos a Cosentyx derivados de ese incremento de tratados."
+        tituloNarrativo: "HSEfficiency",
+        textoAprobado: "Con el Proyecto HSEfficiency, generamos más capacidad en las consultas de Dermatología, a través de una mejora en la organización y eficiencia de la agenda del servicio, adecuando el tiempo a un mayor hueco para primeras visitas y optimizando el tiempo de aquellas que se destinan al seguimiento del paciente, generando una mayor capacidad para diagnosticar y tratar pacientes con Hidradenitis Supurativa.",
+        metricasAprobadas: function(ctx) {
+            var lineas = [];
+            lineas.push('Impacto de un 20% de nuevos huecos para pacientes Hurley II&III');
+            lineas.push('Impacto estimado del proyecto: ' + ctx.impacto_histrack);
+            return lineas;
+        }
     },
     "HS-PROMueve-Derma": {
-        tituloNarrativo: "Estandarización del seguimiento en Dermatología",
-        resumenEjecutivo: "El proyecto mide la estandarización del seguimiento en Dermatología y la aceleración del switch a biológicos en Hidradenitis Supurativa.",
-        lecturaHistrack: "En {hospital}, la contribución estimada al proyecto es de {impacto_histrack} pacientes asociados al impacto pacientes adicionales en switch a biológico ({histrack_label}).",
-        lecturaCosentyx: "Aplicando un share Cosentyx del {share_cosentyx}, se estiman {pacientes_cosentyx} pacientes candidatos a Cosentyx derivados de ese switch."
+        tituloNarrativo: "PROMueve",
+        textoAprobado: "Con el Proyecto PROMueve, estandarizamos el seguimiento del paciente en consulta según su perfil, estadio y nivel de control de la enfermedad. Esto permite optimizar el proceso asistencial, aumentar la capacidad de la consulta y facilitar la toma de decisiones terapéuticas cuando no se alcanzan los estándares clínicos. En este contexto, se generan oportunidades para Cosentyx tanto en pacientes naïve como en aquellos que requieren un cambio de biológico, así como en el mantenimiento del tratamiento a largo plazo.",
+        metricasAprobadas: function(ctx) {
+            var lineas = [];
+            lineas.push(ctx.impacto_histrack + ' pacientes nuevos dinámicos de switch');
+            if (ctx.pacientes_cosentyx !== 'No calculado') {
+                lineas.push(ctx.pacientes_cosentyx + ' pacientes tratados con Cosentyx');
+            }
+            return lineas;
+        }
     },
     "HS-PROMUEVE-FH": {
-        tituloNarrativo: "Seguimiento Farmacia Hospitalaria–Especialista",
-        resumenEjecutivo: "El proyecto mide el seguimiento conjunto Farmacia Hospitalaria–Especialista: adherencia, persistencia, seguridad y detección de pacientes no controlados.",
-        lecturaHistrack: "En {hospital}, la contribución estimada al proyecto es de {impacto_histrack} pacientes asociados al impacto pacientes adicionales en switch a biológico ({histrack_label}).",
-        lecturaCosentyx: "Aplicando un share Cosentyx del {share_cosentyx}, se estiman {pacientes_cosentyx} pacientes candidatos a Cosentyx derivados de ese switch."
+        tituloNarrativo: "PROMueve-FH",
+        textoAprobado: "Con el Proyecto PROMueve-FH liderado por Farmacia Hospitalaria, optimizamos el circuito de seguimiento conjunto entre Farmacia y Especialista, trabajando la estratificación de pacientes en función del riesgo, optimizando la capacidad en las consultas de paciente externo y mejorando el seguimiento de adherencia, persistencia y reporte de efectos adversos, lo que impacta en el incremento de la detección de pacientes no controlados que requieren un cambio de tratamiento y, por tanto, genera más oportunidades para Cosentyx.",
+        metricasAprobadas: function(ctx) {
+            var lineas = [];
+            lineas.push(ctx.impacto_histrack + ' pacientes nuevos dinámicos de switch');
+            if (ctx.pacientes_cosentyx !== 'No calculado') {
+                lineas.push(ctx.pacientes_cosentyx + ' pacientes tratados con Cosentyx');
+            }
+            return lineas;
+        }
     },
     "PROMUEVE EspA": {
-        tituloNarrativo: "Switch a biológicos en Espondiloartritis Axial",
-        resumenEjecutivo: "El proyecto mide el incremento de switch a biológicos en Espondiloartritis Axial, estandarizando criterios de remisión y detección de pacientes no controlados.",
-        lecturaHistrack: "En {hospital}, la contribución estimada al proyecto es de {impacto_histrack} pacientes asociados al impacto pacientes adicionales en switch a biológico ({histrack_label}).",
-        lecturaCosentyx: "Aplicando un share Cosentyx del {share_cosentyx}, se estiman {pacientes_cosentyx} pacientes candidatos a Cosentyx derivados de ese switch."
+        tituloNarrativo: "PROMueve",
+        textoAprobado: "Con el Proyecto PROMueve, estandarizamos el seguimiento del paciente en consulta según su perfil, estadio y nivel de control de la enfermedad. Esto permite optimizar el proceso asistencial, aumentar la capacidad de la consulta y facilitar la toma de decisiones terapéuticas cuando no se alcanzan los estándares clínicos. En este contexto, se generan oportunidades para Cosentyx tanto en pacientes naïve como en aquellos que requieren un cambio de biológico, así como en el mantenimiento del tratamiento a largo plazo.",
+        metricasAprobadas: function(ctx) {
+            var lineas = [];
+            lineas.push(ctx.impacto_histrack + ' pacientes nuevos dinámicos de switch');
+            if (ctx.pacientes_cosentyx !== 'No calculado') {
+                lineas.push(ctx.pacientes_cosentyx + ' pacientes tratados con Cosentyx');
+            }
+            return lineas;
+        }
     },
     "PROMueve APs": {
-        tituloNarrativo: "Switch a biológicos en Artritis Psoriásica",
-        resumenEjecutivo: "El proyecto mide el incremento de switch a biológicos en Artritis Psoriásica, combinando criterios clínicos y seguimiento estructurado.",
-        lecturaHistrack: "En {hospital}, la contribución estimada al proyecto es de {impacto_histrack} pacientes asociados al impacto pacientes adicionales en switch a biológico ({histrack_label}).",
-        lecturaCosentyx: "Aplicando un share Cosentyx del {share_cosentyx}, se estiman {pacientes_cosentyx} pacientes candidatos a Cosentyx derivados de ese switch."
+        tituloNarrativo: "PROMueve",
+        textoAprobado: "Con el Proyecto PROMueve, estandarizamos el seguimiento del paciente en consulta según su perfil, estadio y nivel de control de la enfermedad. Esto permite optimizar el proceso asistencial, aumentar la capacidad de la consulta y facilitar la toma de decisiones terapéuticas cuando no se alcanzan los estándares clínicos. En este contexto, se generan oportunidades para Cosentyx tanto en pacientes naïve como en aquellos que requieren un cambio de biológico, así como en el mantenimiento del tratamiento a largo plazo.",
+        metricasAprobadas: function(ctx) {
+            var lineas = [];
+            lineas.push(ctx.impacto_histrack + ' pacientes nuevos dinámicos de switch');
+            if (ctx.pacientes_cosentyx !== 'No calculado') {
+                lineas.push(ctx.pacientes_cosentyx + ' pacientes tratados con Cosentyx');
+            }
+            return lineas;
+        }
     },
     "EspANDE ": {
-        tituloNarrativo: "Expansión diagnóstica agnóstica en Reumatología",
-        resumenEjecutivo: "El proyecto expande diagnóstico en Reumatología de forma agnóstica, combinando APs y EspAax. El output visible es diagnóstico HISTRACK, no caída comercial a Cosentyx.",
-        lecturaHistrack: "En {hospital}, la contribución estimada al proyecto es de {impacto_histrack} pacientes asociados al impacto nuevos pacientes diagnosticados ({histrack_label}).",
-        lecturaCosentyx: "Cosentyx no se muestra como output visible en esta fase. La estimación comercial permanece como capa interna del modelo."
+        tituloNarrativo: "EspANDE",
+        textoAprobado: null,
+        textoPendiente: "Narrativa interna pendiente de validar para EspANDE.",
+        metricasAprobadas: function(ctx) {
+            var lineas = [];
+            lineas.push(ctx.impacto_histrack + ' pacientes diagnosticados');
+            return lineas;
+        }
     }
 };
 
@@ -1787,6 +1833,37 @@ function getHistrackValorDesdeImpacto(proyectoId, impacto) {
     return null;
 }
 
+/**
+ * Renderiza la narrativa aprobada de un proyecto (texto + métricas).
+ * Devuelve HTML seguro con escaparHTML aplicado.
+ * @param {string} proyectoId
+ * @param {Object} ctx - contexto con impacto_histrack, pacientes_cosentyx, etc.
+ * @returns {string} HTML de narrativa
+ */
+function renderizarNarrativaAprobadaProyecto(proyectoId, ctx) {
+    var narrativa = getNarrativaProyecto(proyectoId);
+    if (!narrativa) return '';
+
+    var texto = narrativa.textoAprobado || narrativa.textoPendiente || '';
+    var textoHtml = escaparHTML(texto);
+
+    var metricas = [];
+    if (typeof narrativa.metricasAprobadas === 'function') {
+        metricas = narrativa.metricasAprobadas(ctx);
+    }
+
+    var metricasHtml = '';
+    if (metricas.length > 0) {
+        metricasHtml = '<ul style="margin: 8px 0 0 0; padding-left: 18px; font-size: 12px; color: #374151;">';
+        metricas.forEach(function(m) {
+            metricasHtml += '<li>' + escaparHTML(m) + '</li>';
+        });
+        metricasHtml += '</ul>';
+    }
+
+    return '<p style="font-size: 12px; color: #374151; line-height: 1.5; margin: 0 0 6px;">' + textoHtml + '</p>' + metricasHtml;
+}
+
 // ===== HELPERS SIM v2 — resumen agregado por proyecto =====
 
 /**
@@ -2000,14 +2077,12 @@ function generarFichaProyectoHtml(proyectoId) {
         }
 
         let lecturaHtml = '';
-        if (narrativa) {
+        {
             const ctx = construirContextoNarrativa(proyectoId, hospital, impacto);
             lecturaHtml = `
                 <div class="narrativa-ficha">
-                    <div class="narrativa-titulo">📖 Lectura ejecutiva</div>
-                    <p>${renderizarPlantillaNarrativa(narrativa.resumenEjecutivo, ctx)}</p>
-                    <p>${renderizarPlantillaNarrativa(narrativa.lecturaHistrack, ctx)}</p>
-                    <p>${renderizarPlantillaNarrativa(narrativa.lecturaCosentyx, ctx)}</p>
+                    <div class="narrativa-titulo">📖 Narrativa del proyecto</div>
+                    ${renderizarNarrativaAprobadaProyecto(proyectoId, ctx)}
                 </div>
             `;
         }
@@ -3477,6 +3552,28 @@ function mostrarResumenPorProyecto(proyectoStats, totalHospitales, totalPoblacio
         }
         hospitalesAsignadosHtml += '</div>';
 
+        const resumenSimV2 = calcularResumenProyectoSimV2(proyectoId);
+        const calculado = resumenSimV2.hospitalesCalculados > 0;
+        const outputLabel = resumenSimV2.histrackLabel || 'Output HISTRACK';
+        const impactoValor = calculado ? formatearNumeroSim(resumenSimV2.totalHistrack) : 'No calculado';
+        const calculadosFmt = resumenSimV2.hospitalesCalculados + '/' + resumenSimV2.hospitalesAsignados;
+
+        let cosentyxLinea = '';
+        if (resumenSimV2.cosentyxVisible) {
+            const cosentyxValor = calculado && resumenSimV2.totalPacientesCosentyx !== null
+                ? formatearNumeroSim(resumenSimV2.totalPacientesCosentyx)
+                : 'No calculado';
+            cosentyxLinea = `<div class="impact-metric">
+                    <span class="impact-metric-label">Cosentyx estimado interno</span>
+                    <span class="impact-metric-value">${cosentyxValor}</span>
+                </div>`;
+        } else {
+            cosentyxLinea = `<div class="impact-metric">
+                    <span class="impact-metric-label">Cosentyx</span>
+                    <span class="impact-metric-value" style="color: #9ca3af; font-size: 11px;">No visible como output en esta fase</span>
+                </div>`;
+        }
+
         html += `
             <div class="impact-card" style="border-left: 4px solid ${proyecto.color}; cursor: pointer;" onclick="abrirDetalleProyecto('${proyectoId}')">
                 <h4 style="color: ${proyecto.color};">${proyecto.nombre}</h4>
@@ -3491,11 +3588,21 @@ function mostrarResumenPorProyecto(proyectoStats, totalHospitales, totalPoblacio
                     <span class="impact-metric-label">Población cubierta</span>
                     <span class="impact-metric-value">${stats.poblacionTotal.toLocaleString()}</span>
                 </div>
-                <div class="impact-metric">
-                    <span class="impact-metric-label">🎯 Impacto pacientes</span>
-                    <span class="impact-metric-value" style="color: var(--aquatic-awe); font-weight: 700;">
-                        ${stats.impactoTotal > 0 ? '+' + stats.impactoTotal.toLocaleString() : 'Pendiente'}
-                    </span>
+                <div style="margin-top: 8px; padding: 8px; background: #f0f9ff; border-radius: 6px; border: 1px solid #bae6fd;">
+                    <div style="font-size: 11px; font-weight: 600; color: #0c4a6e; margin-bottom: 6px;">Dato HISTRACK del proyecto</div>
+                    <div class="impact-metric">
+                        <span class="impact-metric-label">Output HISTRACK</span>
+                        <span class="impact-metric-value" style="font-size: 11px;">${escaparHTML(outputLabel)}</span>
+                    </div>
+                    <div class="impact-metric">
+                        <span class="impact-metric-label">Impacto estimado del proyecto</span>
+                        <span class="impact-metric-value" style="color: var(--aquatic-awe); font-weight: 700;">${impactoValor}</span>
+                    </div>
+                    <div class="impact-metric">
+                        <span class="impact-metric-label">Calculados</span>
+                        <span class="impact-metric-value">${calculadosFmt}</span>
+                    </div>
+                    ${cosentyxLinea}
                 </div>
             </div>
         `;
@@ -4380,23 +4487,14 @@ function abrirDetalleProyecto(proyectoId) {
                 `;
             }
 
-            // Narrativa por hospital
-            const narrativa = getNarrativaProyecto(proyectoId);
+            // Narrativa aprobada del proyecto
             let narrativaHtml = '';
-            if (narrativa) {
+            {
                 const ctx = construirContextoNarrativa(proyectoId, hospital, impacto);
                 narrativaHtml = `
                     <div style="margin-top: 8px; padding: 8px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px;">
-                        <div style="font-size: 11px; font-weight: 600; color: #1e293b; margin-bottom: 4px;">📖 Lectura ejecutiva</div>
-                        <div style="font-size: 11px; color: #475569; margin-bottom: 4px; line-height: 1.4;">
-                            ${renderizarPlantillaNarrativa(narrativa.resumenEjecutivo, ctx)}
-                        </div>
-                        <div style="font-size: 11px; color: #475569; margin-bottom: 4px; line-height: 1.4;">
-                            ${renderizarPlantillaNarrativa(narrativa.lecturaHistrack, ctx)}
-                        </div>
-                        <div style="font-size: 11px; color: #475569; line-height: 1.4;">
-                            ${renderizarPlantillaNarrativa(narrativa.lecturaCosentyx, ctx)}
-                        </div>
+                        <div style="font-size: 11px; font-weight: 600; color: #1e293b; margin-bottom: 4px;">📖 Narrativa del proyecto</div>
+                        ${renderizarNarrativaAprobadaProyecto(proyectoId, ctx)}
                     </div>
                 `;
             }

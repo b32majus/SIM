@@ -1395,6 +1395,258 @@ const proyectos = {
     }
 };
 
+// ===== CONFIGURACIÓN SIM v2 — POR PROYECTO =====
+const CONFIG_PROYECTOS_SIM_V2 = {
+    "HS-Connect-AP ": {
+        outputHistrack: "Impacto nuevos pacientes diagnosticados",
+        shareCosentyxDefault: 0.37,
+        cosentyxVisible: true,
+        etiquetaOrigen: "Expansión diagnóstica",
+        etiquetaTipo: "Conexión AP",
+        descripcionMetodologica: "Mide la expansión del diagnóstico de Hidradenitis Supurativa desde Atención Primaria. Prevalencia HS basada en literatura publicada, aplicada a población asistencial cubierta. La cobertura AP es editable por hospital. El impacto del proyecto (incremento en tasa diagnóstica) es parametrizable."
+    },
+    "HS-Connect Intra": {
+        outputHistrack: "Impacto nuevos pacientes diagnosticados intra",
+        shareCosentyxDefault: 0.37,
+        cosentyxVisible: true,
+        etiquetaOrigen: "Expansión diagnóstica intrahospitalaria",
+        etiquetaTipo: "Conexión Intra",
+        descripcionMetodologica: "Mide la expansión del diagnóstico de HS dentro del ámbito hospitalario (dermatología, cirugía, etc.). Prevalencia HS basada en literatura publicada. El porcentaje de diagnósticos intrahospitalarios y el impacto del proyecto son parametrizables."
+    },
+    "HS-Efficiency": {
+        outputHistrack: "Incremento pacientes tratados/candidatos HS Hurley II-III",
+        shareCosentyxDefault: 0.37,
+        cosentyxVisible: true,
+        etiquetaOrigen: "Capacidad/tratamiento",
+        etiquetaTipo: "Eficiencia",
+        descripcionMetodologica: "Mide la mejora de capacidad y eficiencia en consultas de Dermatología para HS, cuantificando el incremento de pacientes tratados o candidatos a tratamiento (Hurley II-III). Validado internamente. Incluye capa de mercado dinámico y estimación Cosentyx."
+    },
+    "HS-PROMueve-Derma": {
+        outputHistrack: "Incremento pacientes switch biológico",
+        shareCosentyxDefault: 0.37,
+        cosentyxVisible: true,
+        etiquetaOrigen: "Switch",
+        etiquetaTipo: "PROMueve Derma",
+        descripcionMetodologica: "Mide la estandarización del seguimiento en Dermatología y la aceleración del switch a biológicos en HS. Impacto PROMueve parametrizable (20% base). Incluye capa de mercado dinámico y estimación Cosentyx."
+    },
+    "HS-PROMUEVE-FH": {
+        outputHistrack: "Incremento pacientes switch biológico",
+        shareCosentyxDefault: 0.37,
+        cosentyxVisible: true,
+        etiquetaOrigen: "Switch",
+        etiquetaTipo: "PROMueve FH",
+        descripcionMetodologica: "Mide el seguimiento conjunto Farmacia Hospitalaria–Especialista: adherencia, persistencia, seguridad y detección de pacientes no controlados. Impacto PROMueve parametrizable. Lógica análoga a PROMueve-Derma."
+    },
+    "PROMUEVE EspA": {
+        outputHistrack: "Incremento pacientes switch biológico EspAax",
+        shareCosentyxDefault: 0.20,
+        cosentyxVisible: true,
+        etiquetaOrigen: "Switch",
+        etiquetaTipo: "PROMueve EspA",
+        descripcionMetodologica: "Mide el incremento de switch a biológicos en Espondiloartritis Axial (EspAax). Prevalencia EspAax: 0,0026, basada en datos EPISER y adaptada al modelo SIM. Incluye capa de mercado dinámico y estimación Cosentyx."
+    },
+    "PROMueve APs": {
+        outputHistrack: "Incremento pacientes switch biológico APs",
+        shareCosentyxDefault: 0.20,
+        cosentyxVisible: true,
+        etiquetaOrigen: "Switch",
+        etiquetaTipo: "PROMueve APs",
+        descripcionMetodologica: "Mide el incremento de switch a biológicos en Artritis Psoriásica (APs). Prevalencia APs: 0,0058, basada en datos EPISER/SER y adaptada al modelo SIM. Incluye capa de mercado dinámico y estimación Cosentyx."
+    },
+    "EspANDE ": {
+        outputHistrack: "Impacto nuevos pacientes diagnosticados EspANDE",
+        shareCosentyxDefault: 0.20,
+        cosentyxVisible: false,
+        etiquetaOrigen: "Expansión diagnóstica",
+        etiquetaTipo: "EspANDE Reuma",
+        descripcionMetodologica: "Mide la expansión del diagnóstico en Reumatología combinando APs (prevalencia 0,0058) y EspAax (prevalencia 0,0026), con prevalencia combinada de 0,0084. Fuentes: EPISER/SER, adaptadas al modelo SIM. Cobertura e impacto diagnóstico parametrizables por hospital. En esta fase Cosentyx es solo capa interna, no visible."
+    }
+};
+
+// Placeholders disponibles para narrativa dinámica por proyecto
+const PLACEHOLDERS_NARRATIVA = [
+    "territorio",
+    "hospitales",
+    "poblacion",
+    "impacto_histrack",
+    "hurley_ii_iii",
+    "candidatos_biologico",
+    "mercado_dinamico",
+    "pacientes_cosentyx",
+    "share_cosentyx"
+];
+
+// ===== HELPERS SIM v2 =====
+
+/**
+ * Devuelve la configuración completa de un proyecto por su ID.
+ * Retorna null si el proyecto no existe en CONFIG_PROYECTOS_SIM_V2.
+ */
+function getConfigProyecto(proyectoId) {
+    return CONFIG_PROYECTOS_SIM_V2[proyectoId] || null;
+}
+
+/**
+ * Devuelve el share Cosentyx default (nacional) para un proyecto.
+ * HS → 37%, Reuma → 20%.
+ */
+function getShareCosentyxDefault(proyectoId) {
+    const config = CONFIG_PROYECTOS_SIM_V2[proyectoId];
+    return config ? config.shareCosentyxDefault : 0;
+}
+
+/**
+ * Indica si Cosentyx es visible (capa externa/HISTRACK) para un proyecto.
+ * EspANDE devuelve false en esta fase.
+ */
+function esCosentyxVisible(proyectoId) {
+    const config = CONFIG_PROYECTOS_SIM_V2[proyectoId];
+    return config ? config.cosentyxVisible : false;
+}
+
+/**
+ * Devuelve la etiqueta del output HISTRACK canónico para un proyecto.
+ * Por ejemplo: "Incremento pacientes tratados/candidatos HS Hurley II-III" para HS-Efficiency.
+ */
+function getOutputHistrackLabel(proyectoId) {
+    const config = CONFIG_PROYECTOS_SIM_V2[proyectoId];
+    return config ? config.outputHistrack : "";
+}
+
+// ===== HELPERS SIM v2 — share Cosentyx local por hospital/proyecto =====
+
+/**
+ * Devuelve el override local de share Cosentyx para un hospital y proyecto.
+ * Retorna undefined si no existe override.
+ */
+function getShareCosentyxOverride(hospital, proyectoId) {
+    if (!hospital || !hospital.shareCosentyxOverrides) return undefined;
+    const val = hospital.shareCosentyxOverrides[proyectoId];
+    if (typeof val === 'number' && !isNaN(val) && val >= 0 && val <= 1) return val;
+    return undefined;
+}
+
+/**
+ * Establece un override local de share Cosentyx para un hospital y proyecto.
+ * @param {number} hospitalId - ID del hospital en el array global
+ * @param {string} proyectoId - ID canónico del proyecto
+ * @param {number} valorPorcentaje - Porcentaje humano (ej: 42 → se guarda como 0.42)
+ */
+function setShareCosentyxOverride(hospitalId, proyectoId, valorPorcentaje) {
+    const hospital = hospitales.find(h => h.id === hospitalId);
+    if (!hospital) return;
+    if (typeof valorPorcentaje !== 'number' || isNaN(valorPorcentaje)) return;
+    if (valorPorcentaje < 0 || valorPorcentaje > 100) {
+        console.warn('setShareCosentyxOverride: valor fuera de rango 0-100:', valorPorcentaje);
+        return;
+    }
+    if (!hospital.shareCosentyxOverrides) hospital.shareCosentyxOverrides = {};
+    hospital.shareCosentyxOverrides[proyectoId] = valorPorcentaje / 100;
+}
+
+/**
+ * Elimina el override local de share Cosentyx para un hospital y proyecto.
+ */
+function clearShareCosentyxOverride(hospitalId, proyectoId) {
+    const hospital = hospitales.find(h => h.id === hospitalId);
+    if (!hospital || !hospital.shareCosentyxOverrides) return;
+    delete hospital.shareCosentyxOverrides[proyectoId];
+}
+
+/**
+ * Devuelve el share Cosentyx aplicado: override local si existe, si no el default nacional.
+ * EspANDE siempre devuelve 0 (cosentyxVisible=false).
+ */
+function getShareCosentyxAplicado(hospital, proyectoId) {
+    if (proyectoId === 'EspANDE ') return 0;
+    const local = getShareCosentyxOverride(hospital, proyectoId);
+    if (local !== undefined) return local;
+    return getShareCosentyxDefault(proyectoId);
+}
+
+// ===== HELPERS SIM v2 — parámetros y enriquecimiento =====
+
+/**
+ * Devuelve params[key] si es número válido; si no, defaultValue.
+ * Evita el problema de params.key || defaultValue con 0 o falsy.
+ */
+function getParametro(params, key, defaultValue) {
+    const val = params[key];
+    if (typeof val === 'number' && !isNaN(val)) return val;
+    return defaultValue;
+}
+
+/**
+ * Enriquece un resultado base con campos SIM v2:
+ *  - histrackLabel / histrackValor
+ *  - shareCosentyxDefault / shareCosentyxAplicado / shareCosentyxOrigen
+ *  - cosentyxVisible / pacientesCosentyx
+ *  - metricasSimV2 (métricas intermedias)
+ * @param {Object} opts - Opciones opcionales: { shareAplicado, shareOrigen }
+ */
+function enriquecerResultadoSimV2(proyectoId, resultadoBase, metricasExtra, opts) {
+    const config = getConfigProyecto(proyectoId);
+    if (!config || resultadoBase.error) return resultadoBase;
+
+    const shareDefault = config.shareCosentyxDefault;
+    const shareAplicado = (opts && typeof opts.shareAplicado === 'number') ? opts.shareAplicado : shareDefault;
+    const shareOrigen = (opts && opts.shareOrigen) ? opts.shareOrigen : 'nacional';
+
+    // histrackValor: el campo principal según proyecto
+    let histrackValor = 0;
+    if (resultadoBase.impactoNuevosPacientes !== undefined) {
+        histrackValor = resultadoBase.impactoNuevosPacientes;
+    } else if (resultadoBase.incrementoPacientesTratados !== undefined) {
+        histrackValor = resultadoBase.incrementoPacientesTratados;
+    } else if (resultadoBase.incrementoPacientes !== undefined) {
+        histrackValor = resultadoBase.incrementoPacientes;
+    }
+
+    // Cosentyx: null si no visible, calculado si procede
+    let pacientesCosentyx = null;
+    if (config.cosentyxVisible && histrackValor > 0) {
+        // Default 0 para capas que no se calculan en esta fase
+        const hiiii = metricasExtra.hurleyIIIII || 0;
+        const candBio = metricasExtra.candidatosBiologico || 0;
+        const mercDin = metricasExtra.mercadoDinamico || 0;
+
+        switch (proyectoId) {
+            case 'HS-Connect-AP ':
+            case 'HS-Connect Intra':
+                // Capa posterior: hurley → candidatos → mercado dinámico → cosentyx
+                pacientesCosentyx = Math.round(candBio * mercDin * shareAplicado);
+                break;
+            case 'HS-Efficiency':
+                // incrementoPacientesTratados × mercado dinámico × share
+                pacientesCosentyx = Math.round(histrackValor * mercDin * shareAplicado);
+                break;
+            case 'HS-PROMueve-Derma':
+            case 'HS-PROMUEVE-FH':
+            case 'PROMUEVE EspA':
+            case 'PROMueve APs':
+                // incrementoPacientes × share
+                pacientesCosentyx = Math.round(histrackValor * shareAplicado);
+                break;
+            default:
+                pacientesCosentyx = null;
+        }
+    }
+
+    const enriquecido = Object.assign({}, resultadoBase, {
+        histrackLabel: config.outputHistrack,
+        histrackValor: Math.round(histrackValor),
+        shareCosentyxDefault: shareDefault,
+        shareCosentyxAplicado: shareAplicado,
+        shareCosentyxOrigen: shareOrigen,
+        cosentyxVisible: config.cosentyxVisible,
+        pacientesCosentyx: pacientesCosentyx,
+        metricasSimV2: metricasExtra
+    });
+
+    return enriquecido;
+}
+
+
 // FUNCIONES DE IMPORTACIÓN
 function importarHospitales() {
     const fileInput = document.getElementById('fileInputHospitales');
@@ -1723,7 +1975,8 @@ function cargarSeleccionDinamica() {
             impactos: hospitalOriginal.impactos ? { ...hospitalOriginal.impactos } : {},
             seleccionado: hospitalOriginal.seleccionado !== undefined ? hospitalOriginal.seleccionado : true,
             esFusionado: hospitalOriginal.esFusionado || false,
-            hospitalesOriginales: hospitalOriginal.hospitalesOriginales ? [...hospitalOriginal.hospitalesOriginales] : []
+            hospitalesOriginales: hospitalOriginal.hospitalesOriginales ? [...hospitalOriginal.hospitalesOriginales] : [],
+            shareCosentyxOverrides: hospitalOriginal.shareCosentyxOverrides ? { ...hospitalOriginal.shareCosentyxOverrides } : {}
         };
         hospitales.push(hospital);
     });
@@ -1769,7 +2022,8 @@ function cargarTodosHospitales() {
             impactos: hospitalOriginal.impactos ? { ...hospitalOriginal.impactos } : {},
             seleccionado: hospitalOriginal.seleccionado !== undefined ? hospitalOriginal.seleccionado : true,
             esFusionado: hospitalOriginal.esFusionado || false,
-            hospitalesOriginales: hospitalOriginal.hospitalesOriginales ? [...hospitalOriginal.hospitalesOriginales] : []
+            hospitalesOriginales: hospitalOriginal.hospitalesOriginales ? [...hospitalOriginal.hospitalesOriginales] : [],
+            shareCosentyxOverrides: hospitalOriginal.shareCosentyxOverrides ? { ...hospitalOriginal.shareCosentyxOverrides } : {}
         };
         hospitales.push(hospital);
     });
@@ -2010,33 +2264,56 @@ function calcularImpactoProyecto(hospital, proyectoId) {
     const poblacion = hospital.poblacion || 0;
     const coberturaAPHospital = hospital.coberturaAP !== undefined ? hospital.coberturaAP : 0;
 
+    let resultadoBase;
     switch(proyectoId) {
         case 'HS-Connect-AP ':
-            return calcularHSConnectAP(poblacion, coberturaAPHospital, proyecto.parametros);
+            resultadoBase = calcularHSConnectAP(poblacion, coberturaAPHospital, proyecto.parametros);
+            break;
         case 'HS-Connect Intra':
-            return calcularHSConnectIntra(poblacion, proyecto.parametros);
+            resultadoBase = calcularHSConnectIntra(poblacion, proyecto.parametros);
+            break;
         case 'HS-Efficiency':
-            return calcularHSEfficiency(poblacion, proyecto.parametros);
+            resultadoBase = calcularHSEfficiency(poblacion, proyecto.parametros);
+            break;
         case 'HS-PROMueve-Derma':
-            return calcularHSPROMueveDerma(poblacion, proyecto.parametros);
+            resultadoBase = calcularHSPROMueveDerma(poblacion, proyecto.parametros);
+            break;
         case 'HS-PROMUEVE-FH':
-            return calcularHSPROMueveFH(poblacion, proyecto.parametros);
+            resultadoBase = calcularHSPROMueveFH(poblacion, proyecto.parametros);
+            break;
         case 'PROMUEVE EspA':
-            return calcularPROMueveEspA(poblacion, proyecto.parametros);
+            resultadoBase = calcularPROMueveEspA(poblacion, proyecto.parametros);
+            break;
         case 'PROMueve APs':
-            return calcularPROMueveAPs(poblacion, proyecto.parametros);
+            resultadoBase = calcularPROMueveAPs(poblacion, proyecto.parametros);
+            break;
         case 'EspANDE ':
-            return calcularEspANDE(poblacion, coberturaAPHospital, proyecto.parametros);
+            resultadoBase = calcularEspANDE(poblacion, coberturaAPHospital, proyecto.parametros);
+            break;
         default:
             return { error: 'Proyecto no reconocido' };
     }
+
+    // Enriquecer con campos SIM v2 (histrack, Cosentyx, métricas intermedias)
+    const metricasExtra = resultadoBase._metricasSimV2 || {};
+    delete resultadoBase._metricasSimV2;
+
+    // Resolver share Cosentyx: override local si existe, default nacional si no
+    const shareLocal = getShareCosentyxOverride(hospital, proyectoId);
+    const shareResuelto = getShareCosentyxAplicado(hospital, proyectoId);
+    const shareOrigen = (shareLocal !== undefined) ? 'local' : 'nacional';
+
+    return enriquecerResultadoSimV2(proyectoId, resultadoBase, metricasExtra, {
+        shareAplicado: shareResuelto,
+        shareOrigen: shareOrigen
+    });
 }
 
 // Cálculos específicos
 function calcularHSConnectAP(poblacion, coberturaAP, params) {
-    const prevalencia = params.prevalencia || 0.005;
-    const tasaDiagnostica = params.tasaDiagnostica || 0.38;
-    const impactoRatio = params.impactoRatio || 0.4;
+    const prevalencia = getParametro(params, 'prevalencia', 0.005);
+    const tasaDiagnostica = getParametro(params, 'tasaDiagnostica', 0.38);
+    const impactoRatio = getParametro(params, 'impactoRatio', 0.20);
 
     const poblacionCubierta = poblacion * coberturaAP;
     const pacientesPrevalentes = poblacionCubierta * prevalencia;
@@ -2045,18 +2322,36 @@ function calcularHSConnectAP(poblacion, coberturaAP, params) {
     const pacientesDiagnosticadosConProyecto = pacientesPrevalentes * ratioConProyecto;
     const impactoNuevosPacientes = pacientesDiagnosticadosConProyecto - pacientesDiagnosticados;
 
+    // Capa posterior Cosentyx
+    const pctHurleyIIIII = getParametro(params, 'pctHurleyIIIII', 0.66);
+    const tasaCandidatos = getParametro(params, 'tasaCandidatos', 0.66);
+    const mercadoDinamico = getParametro(params, 'mercadoDinamico', 0.60);
+
+    const hurleyIIIII = impactoNuevosPacientes * pctHurleyIIIII;
+    const candidatosBiologico = hurleyIIIII * tasaCandidatos;
+    const mercadoDinamicoCapa = candidatosBiologico * mercadoDinamico;
+
     return {
         impactoNuevosPacientes: Math.round(impactoNuevosPacientes),
         pacientesPrevalentes: Math.round(pacientesPrevalentes),
-        pacientesDiagnosticados: Math.round(pacientesDiagnosticados)
+        pacientesDiagnosticados: Math.round(pacientesDiagnosticados),
+        _metricasSimV2: {
+            poblacionCubierta: Math.round(poblacionCubierta),
+            hurleyIIIII: Math.round(hurleyIIIII),
+            candidatosBiologico: Math.round(candidatosBiologico),
+            mercadoDinamico: Math.round(mercadoDinamicoCapa),
+            pctHurleyIIIII: pctHurleyIIIII,
+            tasaCandidatos: tasaCandidatos,
+            mercadoDinamicoPct: mercadoDinamico
+        }
     };
 }
 
 function calcularHSConnectIntra(poblacion, params) {
-    const prevalencia = params.prevalencia || 0.005;
-    const tasaDiagnostica = params.tasaDiagnostica || 0.38;
-    const incrementoTasa = params.incrementoTasa || 0.4;
-    const diagnosticosIntra = params.diagnosticosIntra || 0.2;
+    const prevalencia = getParametro(params, 'prevalencia', 0.005);
+    const tasaDiagnostica = getParametro(params, 'tasaDiagnostica', 0.38);
+    const incrementoTasa = getParametro(params, 'incrementoTasa', 0.20);
+    const diagnosticosIntra = getParametro(params, 'diagnosticosIntra', 0.20);
 
     const pacientesPrevalentes = poblacion * prevalencia;
     const pacientesDiagnosticados = pacientesPrevalentes * tasaDiagnostica;
@@ -2065,18 +2360,36 @@ function calcularHSConnectIntra(poblacion, params) {
     const pacientesDiagnosticadosConProyecto = pacientesPrevalentes * tasaConProyecto * diagnosticosIntra;
     const impactoNuevosPacientes = pacientesDiagnosticadosConProyecto - diagnosticosIntrahospitalarios;
 
+    // Capa posterior Cosentyx
+    const pctHurleyIIIII = getParametro(params, 'pctHurleyIIIII', 0.66);
+    const tasaCandidatos = getParametro(params, 'tasaCandidatos', 0.66);
+    const mercadoDinamico = getParametro(params, 'mercadoDinamico', 0.60);
+
+    const hurleyIIIII = impactoNuevosPacientes * pctHurleyIIIII;
+    const candidatosBiologico = hurleyIIIII * tasaCandidatos;
+    const mercadoDinamicoCapa = candidatosBiologico * mercadoDinamico;
+
     return {
         impactoNuevosPacientes: Math.round(impactoNuevosPacientes),
         pacientesPrevalentes: Math.round(pacientesPrevalentes),
-        pacientesDiagnosticados: Math.round(pacientesDiagnosticados)
+        pacientesDiagnosticados: Math.round(pacientesDiagnosticados),
+        _metricasSimV2: {
+            diagnosticosIntrahospitalarios: Math.round(diagnosticosIntrahospitalarios),
+            hurleyIIIII: Math.round(hurleyIIIII),
+            candidatosBiologico: Math.round(candidatosBiologico),
+            mercadoDinamico: Math.round(mercadoDinamicoCapa),
+            pctHurleyIIIII: pctHurleyIIIII,
+            tasaCandidatos: tasaCandidatos,
+            mercadoDinamicoPct: mercadoDinamico
+        }
     };
 }
 
 function calcularHSEfficiency(poblacion, params) {
-    const prevalencia = params.prevalencia || 0.005;
-    const tasaDiagnostica = params.tasaDiagnostica || 0.38;
-    const tasaTratamiento = params.tasaTratamiento || 0.66;
-    const incrementoTratamiento = params.incrementoTratamiento || 0.2;
+    const prevalencia = getParametro(params, 'prevalencia', 0.005);
+    const tasaDiagnostica = getParametro(params, 'tasaDiagnostica', 0.38);
+    const tasaTratamiento = getParametro(params, 'tasaTratamiento', 0.66);
+    const incrementoTratamiento = getParametro(params, 'incrementoTratamiento', 0.20);
 
     const pacientesPrevalentes = poblacion * prevalencia;
     const pacientesDiagnosticados = pacientesPrevalentes * tasaDiagnostica;
@@ -2085,19 +2398,28 @@ function calcularHSEfficiency(poblacion, params) {
     const pacientesTratadosConProyecto = pacientesDiagnosticados * tasaTratamientoConProyecto;
     const incrementoPacientesTratados = pacientesTratadosConProyecto - pacientesTratados;
 
+    // Capa posterior Cosentyx
+    const mercadoDinamico = getParametro(params, 'mercadoDinamico', 0.60);
+
     return {
         incrementoPacientesTratados: Math.round(incrementoPacientesTratados),
         pacientesPrevalentes: Math.round(pacientesPrevalentes),
-        pacientesDiagnosticados: Math.round(pacientesDiagnosticados)
+        pacientesDiagnosticados: Math.round(pacientesDiagnosticados),
+        _metricasSimV2: {
+            pacientesTratados: Math.round(pacientesTratados),
+            pacientesTratadosConProyecto: Math.round(pacientesTratadosConProyecto),
+            mercadoDinamico: Math.round(incrementoPacientesTratados * mercadoDinamico),
+            mercadoDinamicoPct: mercadoDinamico
+        }
     };
 }
 
 function calcularHSPROMueveDerma(poblacion, params) {
-    const prevalencia = params.prevalencia || 0.005;
-    const tasaDiagnostica = params.tasaDiagnostica || 0.38;
-    const tasaTratamiento = params.tasaTratamiento || 0.66;
-    const pacientesDinamicos = params.pacientesDinamicos || 0.19;
-    const impactoSwitch = params.impactoSwitch || 0.2;
+    const prevalencia = getParametro(params, 'prevalencia', 0.005);
+    const tasaDiagnostica = getParametro(params, 'tasaDiagnostica', 0.38);
+    const tasaTratamiento = getParametro(params, 'tasaTratamiento', 0.66);
+    const pacientesDinamicos = getParametro(params, 'pacientesDinamicos', 0.19);
+    const impactoSwitch = getParametro(params, 'impactoSwitch', 0.20);
 
     const pacientesPrevalentes = poblacion * prevalencia;
     const pacientesDiagnosticados = pacientesPrevalentes * tasaDiagnostica;
@@ -2110,7 +2432,13 @@ function calcularHSPROMueveDerma(poblacion, params) {
     return {
         incrementoPacientes: Math.round(incrementoPacientes),
         pacientesPrevalentes: Math.round(pacientesPrevalentes),
-        pacientesDiagnosticados: Math.round(pacientesDiagnosticados)
+        pacientesDiagnosticados: Math.round(pacientesDiagnosticados),
+        _metricasSimV2: {
+            pacientesTratados: Math.round(pacientesTratados),
+            pacientesDinamicosBase: Math.round(pacientesDinamicosBase),
+            pacientesDinamicosConProyecto: Math.round(pacientesDinamicosConProyecto),
+            impactoSwitchPct: impactoSwitch
+        }
     };
 }
 
@@ -2119,11 +2447,11 @@ function calcularHSPROMueveFH(poblacion, params) {
 }
 
 function calcularPROMueveEspA(poblacion, params) {
-    const prevalencia = params.prevalencia || 0.0026;
-    const tasaDiagnostica = params.tasaDiagnostica || 0.4;
-    const tasaTratamiento = params.tasaTratamiento || 0.72;
-    const mercadoDinamico = params.mercadoDinamico || 0.09;
-    const incrementoShare = params.incrementoShare || 0.2;
+    const prevalencia = getParametro(params, 'prevalencia', 0.0026);
+    const tasaDiagnostica = getParametro(params, 'tasaDiagnostica', 0.40);
+    const tasaTratamiento = getParametro(params, 'tasaTratamiento', 0.72);
+    const mercadoDinamico = getParametro(params, 'mercadoDinamico', 0.09);
+    const incrementoShare = getParametro(params, 'incrementoShare', 0.20);
 
     const pacientesPrevalentes = poblacion * prevalencia;
     const pacientesDiagnosticados = pacientesPrevalentes * tasaDiagnostica;
@@ -2136,16 +2464,22 @@ function calcularPROMueveEspA(poblacion, params) {
     return {
         incrementoPacientes: Math.round(incrementoPacientes),
         pacientesPrevalentes: Math.round(pacientesPrevalentes),
-        pacientesDiagnosticados: Math.round(pacientesDiagnosticados)
+        pacientesDiagnosticados: Math.round(pacientesDiagnosticados),
+        _metricasSimV2: {
+            pacientesTratados: Math.round(pacientesTratados),
+            pacientesDinamicosBase: Math.round(pacientesDinamicosBase),
+            pacientesDinamicosConProyecto: Math.round(pacientesDinamicosConProyecto),
+            mercadoDinamicoPct: mercadoDinamico
+        }
     };
 }
 
 function calcularPROMueveAPs(poblacion, params) {
-    const prevalencia = params.prevalencia || 0.0056;
-    const tasaDiagnostica = params.tasaDiagnostica || 0.5;
-    const tasaTratamiento = params.tasaTratamiento || 0.8;
-    const mercadoDinamico = params.mercadoDinamico || 0.1;
-    const incrementoShare = params.incrementoShare || 0.2;
+    const prevalencia = getParametro(params, 'prevalencia', 0.0058);
+    const tasaDiagnostica = getParametro(params, 'tasaDiagnostica', 0.50);
+    const tasaTratamiento = getParametro(params, 'tasaTratamiento', 0.80);
+    const mercadoDinamico = getParametro(params, 'mercadoDinamico', 0.10);
+    const incrementoShare = getParametro(params, 'incrementoShare', 0.20);
 
     const pacientesPrevalentes = poblacion * prevalencia;
     const pacientesDiagnosticados = pacientesPrevalentes * tasaDiagnostica;
@@ -2158,14 +2492,20 @@ function calcularPROMueveAPs(poblacion, params) {
     return {
         incrementoPacientes: Math.round(incrementoPacientes),
         pacientesPrevalentes: Math.round(pacientesPrevalentes),
-        pacientesDiagnosticados: Math.round(pacientesDiagnosticados)
+        pacientesDiagnosticados: Math.round(pacientesDiagnosticados),
+        _metricasSimV2: {
+            pacientesTratados: Math.round(pacientesTratados),
+            pacientesDinamicosBase: Math.round(pacientesDinamicosBase),
+            pacientesDinamicosConProyecto: Math.round(pacientesDinamicosConProyecto),
+            mercadoDinamicoPct: mercadoDinamico
+        }
     };
 }
 
 function calcularEspANDE(poblacion, coberturaAP, params) {
-    const prevalencia = params.prevalencia || 0.0026;
-    const tasaDiagnostica = params.tasaDiagnostica || 0.4;
-    const impactoTasa = params.impactoTasa || 0.4;
+    const prevalencia = getParametro(params, 'prevalencia', 0.0084);
+    const tasaDiagnostica = getParametro(params, 'tasaDiagnostica', 0.40);
+    const impactoTasa = getParametro(params, 'impactoTasa', 0.20);
 
     const pacientesPrevalentes = poblacion * prevalencia;
     const pacientesPrevalentesProyecto = pacientesPrevalentes * coberturaAP;
@@ -2177,7 +2517,13 @@ function calcularEspANDE(poblacion, coberturaAP, params) {
     return {
         impactoNuevosPacientes: Math.round(impactoNuevosPacientes),
         pacientesPrevalentes: Math.round(pacientesPrevalentes),
-        pacientesDiagnosticados: Math.round(pacientesDiagnosticados)
+        pacientesDiagnosticados: Math.round(pacientesDiagnosticados),
+        _metricasSimV2: {
+            coberturaAP: coberturaAP,
+            prevalencia: prevalencia,
+            tasaDiagnostica: tasaDiagnostica,
+            impactoTasaPct: impactoTasa
+        }
     };
 }
 
@@ -2720,7 +3066,8 @@ function exportarResultados() {
             impactos: h.impactos || {},
             seleccionado: h.seleccionado,
             esFusionado: h.esFusionado || false,
-            hospitalesOriginales: h.hospitalesOriginales || []
+            hospitalesOriginales: h.hospitalesOriginales || [],
+            shareCosentyxOverrides: h.shareCosentyxOverrides || {}
         })),
         parametrosCargados: parametrosCargados,
         version: 'NACIONAL_1.0'
@@ -3123,7 +3470,8 @@ function procesarArchivoJSON() {
                     impactos: hospitalData.impactos || {},
                     seleccionado: hospitalData.seleccionado !== undefined ? hospitalData.seleccionado : true,
                     esFusionado: hospitalData.esFusionado || false,
-                    hospitalesOriginales: hospitalData.hospitalesOriginales || []
+                    hospitalesOriginales: hospitalData.hospitalesOriginales || [],
+                    shareCosentyxOverrides: hospitalData.shareCosentyxOverrides ? { ...hospitalData.shareCosentyxOverrides } : {}
                 };
                 hospitales.push(hospital);
             });
@@ -3145,7 +3493,8 @@ function procesarArchivoJSON() {
                     impactos: h.impactos ? { ...h.impactos } : {},
                     seleccionado: h.seleccionado !== undefined ? h.seleccionado : true,
                     esFusionado: h.esFusionado || false,
-                    hospitalesOriginales: h.hospitalesOriginales ? [...h.hospitalesOriginales] : []
+                    hospitalesOriginales: h.hospitalesOriginales ? [...h.hospitalesOriginales] : [],
+                    shareCosentyxOverrides: h.shareCosentyxOverrides ? { ...h.shareCosentyxOverrides } : {}
                 }));
                 poblarSelectores();
                 document.getElementById('filtrosContainer').style.display = 'block';
@@ -3388,7 +3737,19 @@ function ejecutarFusionHospitales() {
         hospitalesOriginales: [
             { nombre: hospital1.nombre, codigo: hospital1.codigo, poblacion: hospital1.poblacion },
             { nombre: hospital2.nombre, codigo: hospital2.codigo, poblacion: hospital2.poblacion }
-        ]
+        ],
+        shareCosentyxOverrides: (() => {
+            const merged = { ...(hospital1.shareCosentyxOverrides || {}) };
+            const overrides2 = hospital2.shareCosentyxOverrides || {};
+            for (const pid of Object.keys(overrides2)) {
+                if (merged[pid] !== undefined && merged[pid] !== overrides2[pid]) {
+                    console.warn(`Fusión: conflicto share Cosentyx proyecto "${pid}": hospital1=${merged[pid]}, hospital2=${overrides2[pid]}. Se usa valor del hospital 1.`);
+                } else {
+                    merged[pid] = overrides2[pid];
+                }
+            }
+            return merged;
+        })()
     };
     
     // Eliminar los hospitales originales

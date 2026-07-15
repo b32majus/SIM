@@ -3637,7 +3637,7 @@ function abrirDetalleProyecto(proyectoId) {
                 const pacientesCosentyx = (impacto && typeof impacto.pacientesCosentyx === 'number') ? impacto.pacientesCosentyx : null;
                 const overrideVal = getShareCosentyxOverride(hospital, proyectoId);
                 const overridePct = (overrideVal !== undefined) ? (overrideVal * 100).toFixed(1) : '';
-                const safeProyectoId = JSON.stringify(proyectoId);
+                const safeProyectoId = escaparHTML(JSON.stringify(proyectoId));
                 const inputId = 'input-share-' + crearIdSeguro(hospital.id, proyectoId);
 
                 cosentyxHtml = `

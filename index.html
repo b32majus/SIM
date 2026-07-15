@@ -1613,12 +1613,9 @@ function enriquecerResultadoSimV2(proyectoId, resultadoBase, metricasExtra, opts
         switch (proyectoId) {
             case 'HS-Connect-AP ':
             case 'HS-Connect Intra':
-                // Capa posterior: hurley → candidatos → mercado dinámico → cosentyx
-                pacientesCosentyx = Math.round(candBio * mercDin * shareAplicado);
-                break;
             case 'HS-Efficiency':
-                // incrementoPacientesTratados × mercado dinámico × share
-                pacientesCosentyx = Math.round(histrackValor * mercDin * shareAplicado);
+                // mercadoDinamico ya incluye la base (candidatosBiologico o incrementoPacientesTratados)
+                pacientesCosentyx = Math.round(mercDin * shareAplicado);
                 break;
             case 'HS-PROMueve-Derma':
             case 'HS-PROMUEVE-FH':

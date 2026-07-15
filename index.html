@@ -1313,6 +1313,16 @@ function escaparHTML(valor) {
 }
 
 /**
+ * Genera un ID DOM seguro a partir de partes de string.
+ * Reemplaza caracteres no seguros para evitar espacios y símbolos en IDs.
+ */
+function crearIdSeguro(...partes) {
+    return partes.map(function(p) {
+        return encodeURIComponent(String(p)).replace(/%/g, '_');
+    }).join('__');
+}
+
+/**
  * Verifica si un valor de ISP corresponde a un responsable real asignado.
  * Retorna false para valores como "NO ISP", "Sin asignar", "N/A", etc.
  */
@@ -1562,6 +1572,57 @@ function getShareCosentyxAplicado(hospital, proyectoId) {
     const local = getShareCosentyxOverride(hospital, proyectoId);
     if (local !== undefined) return local;
     return getShareCosentyxDefault(proyectoId);
+}
+
+// ===== HELPERS SIM v2 — actualizar/limpiar share desde modal =====
+
+/**
+ * Lee el input de share local en el modal, valida, guarda override,
+ * recalcula impacto, actualiza tabla/resúmenes y refresca el modal.
+ */
+function actualizarShareCosentyxDesdeModal(hospitalId, proyectoId) {
+    const inputId = 'input-share-' + crearIdSeguro(hospitalId, proyectoId);
+    const input = document.getElementById(inputId);
+    if (!input) {
+        console.warn('actualizarShareCosentyxDesdeModal: input no encontrado', inputId);
+        return;
+    }
+    const raw = input.value.trim().replace(',', '.');
+    const val = parseFloat(raw);
+    if (isNaN(val) || val < 0 || val > 100) {
+        alert('⚠️ El share debe ser un número entre 0 y 100.');
+        return;
+    }
+    setShareCosentyxOverride(hospitalId, proyectoId, val);
+
+    // Recalcular impacto de este hospital/proyecto
+    const hospital = hospitales.find(function(h) { return h.id === hospitalId; });
+    if (hospital) {
+        hospital.impactos[proyectoId] = calcularImpactoProyecto(hospital, proyectoId);
+    }
+
+    // Refrescar tabla, resúmenes y modal
+    actualizarTablaHospitales();
+    actualizarResumenes();
+    abrirDetalleProyecto(proyectoId);
+    console.log('✅ Share local aplicado:', proyectoId, hospitalId, val + '%');
+}
+
+/**
+ * Elimina override local, recalcula impacto, refresca tabla/resúmenes/modal.
+ */
+function limpiarShareCosentyxDesdeModal(hospitalId, proyectoId) {
+    clearShareCosentyxOverride(hospitalId, proyectoId);
+
+    const hospital = hospitales.find(function(h) { return h.id === hospitalId; });
+    if (hospital) {
+        hospital.impactos[proyectoId] = calcularImpactoProyecto(hospital, proyectoId);
+    }
+
+    actualizarTablaHospitales();
+    actualizarResumenes();
+    abrirDetalleProyecto(proyectoId);
+    console.log('✅ Share local eliminado, usando default nacional:', proyectoId, hospitalId);
 }
 
 // ===== HELPERS SIM v2 — parámetros y enriquecimiento =====
@@ -3527,17 +3588,20 @@ function abrirDetalleProyecto(proyectoId) {
     document.getElementById('modalTitle').textContent = proyecto.nombre;
 
     const hospitalesConProyecto = hospitales.filter(h => h.seleccionado && h.proyectos && h.proyectos.includes(proyectoId));
+    const config = getConfigProyecto(proyectoId);
+    const cosentyxVisible = config ? config.cosentyxVisible : false;
+    const shareDefaultPct = config ? Math.round(config.shareCosentyxDefault * 100) : 0;
 
     let contenidoHtml = `
         <div class="impact-card">
             <h4>Información del Proyecto</h4>
             <div class="impact-metric">
                 <span class="impact-metric-label">Área terapéutica</span>
-                <span class="impact-metric-value">${proyecto.area}</span>
+                <span class="impact-metric-value">${escaparHTML(proyecto.area)}</span>
             </div>
             <div class="impact-metric">
                 <span class="impact-metric-label">Descripción</span>
-                <span class="impact-metric-value">${proyecto.descripcion}</span>
+                <span class="impact-metric-value">${escaparHTML(proyecto.descripcion)}</span>
             </div>
             <div class="impact-metric">
                 <span class="impact-metric-label">Hospitales asignados (seleccionados)</span>
@@ -3555,23 +3619,76 @@ function abrirDetalleProyecto(proyectoId) {
 
             if (impacto && !impacto.error) {
                 if (impacto.impactoNuevosPacientes) {
-                    impactoTexto = `+${impacto.impactoNuevosPacientes} nuevos pacientes`;
+                    impactoTexto = '+' + impacto.impactoNuevosPacientes + ' nuevos pacientes';
                 } else if (impacto.incrementoPacientesTratados) {
-                    impactoTexto = `+${impacto.incrementoPacientesTratados} pacientes tratados`;
+                    impactoTexto = '+' + impacto.incrementoPacientesTratados + ' pacientes tratados';
                 } else if (impacto.incrementoPacientes) {
-                    impactoTexto = `+${impacto.incrementoPacientes} pacientes dinámicos`;
+                    impactoTexto = '+' + impacto.incrementoPacientes + ' pacientes dinámicos';
                 }
+            }
+
+            // Bloque Cosentyx inline (solo si visible)
+            let cosentyxHtml = '';
+            if (cosentyxVisible) {
+                const histrackLabel = (impacto && impacto.histrackLabel) ? impacto.histrackLabel : getOutputHistrackLabel(proyectoId);
+                const histrackValor = (impacto && typeof impacto.histrackValor === 'number') ? impacto.histrackValor : null;
+                const shareAplicado = (impacto && typeof impacto.shareCosentyxAplicado === 'number') ? impacto.shareCosentyxAplicado : getShareCosentyxAplicado(hospital, proyectoId);
+                const shareOrigen = (impacto && impacto.shareCosentyxOrigen) ? impacto.shareCosentyxOrigen : ((getShareCosentyxOverride(hospital, proyectoId) !== undefined) ? 'local' : 'nacional');
+                const pacientesCosentyx = (impacto && typeof impacto.pacientesCosentyx === 'number') ? impacto.pacientesCosentyx : null;
+                const overrideVal = getShareCosentyxOverride(hospital, proyectoId);
+                const overridePct = (overrideVal !== undefined) ? (overrideVal * 100).toFixed(1) : '';
+                const safeProyectoId = JSON.stringify(proyectoId);
+                const inputId = 'input-share-' + crearIdSeguro(hospital.id, proyectoId);
+
+                cosentyxHtml = `
+                    <div style="margin-top: 8px; padding: 8px; background: #fff; border: 1px solid #dbeafe; border-radius: 4px;">
+                        <div style="font-size: 11px; color: #374151; margin-bottom: 4px;">
+                            <strong>Output HISTRACK:</strong> ${escaparHTML(histrackLabel)} = ${histrackValor !== null ? histrackValor.toLocaleString() : 'No calculado'}
+                        </div>
+                        <div style="font-size: 11px; color: #374151; margin-bottom: 4px;">
+                            <strong>Share Cosentyx aplicado:</strong> ${(shareAplicado * 100).toFixed(1)}% <span style="color:#6b7280;">(${escaparHTML(shareOrigen)})</span>
+                        </div>
+                        <div style="font-size: 11px; color: #374151; margin-bottom: 6px;">
+                            <strong>Pacientes Cosentyx:</strong> ${pacientesCosentyx !== null ? pacientesCosentyx.toLocaleString() : 'No calculado'}
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <label style="font-size: 11px; color: #374151; white-space: nowrap;">Share Cosentyx local (%)</label>
+                            <input type="number" id="${escaparHTML(inputId)}" min="0" max="100" step="0.1"
+                                placeholder="Default nacional: ${shareDefaultPct}%"
+                                value="${overridePct}"
+                                style="width: 70px; padding: 2px 4px; font-size: 11px; border: 1px solid #d1d5db; border-radius: 4px;">
+                            <button type="button"
+                                onclick="actualizarShareCosentyxDesdeModal(${hospital.id}, ${safeProyectoId})"
+                                style="padding: 2px 8px; font-size: 11px; background: var(--aquatic-awe); color: #fff; border: none; border-radius: 4px; cursor: pointer;">
+                                Aplicar share local
+                            </button>
+                            <button type="button"
+                                onclick="limpiarShareCosentyxDesdeModal(${hospital.id}, ${safeProyectoId})"
+                                style="padding: 2px 8px; font-size: 11px; background: #f3f4f6; color: #374151; border: 1px solid #d1d5db; border-radius: 4px; cursor: pointer;">
+                                Usar default nacional
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                // Proyecto sin Cosentyx visible (ej. EspANDE)
+                cosentyxHtml = `
+                    <div style="margin-top: 8px; padding: 8px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 4px; font-size: 11px; color: #6b7280;">
+                        Cosentyx no se muestra para este proyecto en SIM v2. El output visible es HISTRACK diagnóstico.
+                    </div>
+                `;
             }
 
             contenidoHtml += `
                 <div style="border: 1px solid #e0e6ed; border-radius: 6px; padding: 12px; margin: 8px 0; background: #f9fafb;">
                     <div style="font-weight: 500; margin-bottom: 4px;">${escaparHTML(hospital.nombre)}</div>
                     <div style="font-size: 11px; color: #6b7280; margin-bottom: 4px;">
-                        ISP: ${escaparHTML(hospital.isp)}, Provincia: ${escaparHTML(hospital.provincia)}, Población: ${hospital.poblacion?.toLocaleString()}, Cobertura AP: ${(hospital.coberturaAP * 100).toFixed(2)}%
+                        ISP: ${escaparHTML(hospital.isp)}, Provincia: ${escaparHTML(hospital.provincia)}, Población: ${hospital.poblacion ? hospital.poblacion.toLocaleString() : '0'}, Cobertura AP: ${(hospital.coberturaAP * 100).toFixed(2)}%
                     </div>
                     <div style="font-size: 12px; color: var(--aquatic-awe); font-weight: 500;">
                         📊 ${impactoTexto}
                     </div>
+                    ${cosentyxHtml}
                 </div>
             `;
         });

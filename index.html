@@ -1750,6 +1750,130 @@ function renderizarPlantillaNarrativa(texto, contexto) {
     return escaparHTML(resultado);
 }
 
+// ===== HELPERS SIM v2 — resumen agregado por proyecto =====
+
+/**
+ * Calcula resumen agregado SIM v2 para un proyecto sobre hospitales seleccionados.
+ * No recalcula impactos; usa solo los ya existentes.
+ */
+function calcularResumenProyectoSimV2(proyectoId) {
+    const hospitalesConProyecto = hospitales.filter(function(h) {
+        return h.seleccionado && h.proyectos && h.proyectos.includes(proyectoId);
+    });
+
+    const config = getConfigProyecto(proyectoId);
+    const histrackLabel = config ? config.outputHistrack : getOutputHistrackLabel(proyectoId);
+    const cosentyxVisible = config ? config.cosentyxVisible : false;
+
+    let totalHistrack = 0;
+    let totalPacientesCosentyx = 0;
+    let hospitalesCalculados = 0;
+    let hospitalesSinCalculo = 0;
+    let hospitalesShareLocal = 0;
+    let hospitalesShareNacional = 0;
+
+    hospitalesConProyecto.forEach(function(hospital) {
+        const impacto = hospital.impactos && hospital.impactos[proyectoId];
+        if (impacto && !impacto.error) {
+            hospitalesCalculados++;
+            if (typeof impacto.histrackValor === 'number') {
+                totalHistrack += impacto.histrackValor;
+            }
+            if (cosentyxVisible && typeof impacto.pacientesCosentyx === 'number') {
+                totalPacientesCosentyx += impacto.pacientesCosentyx;
+            }
+            const tieneLocal = (impacto.shareCosentyxOrigen === 'local') ||
+                               (getShareCosentyxOverride(hospital, proyectoId) !== undefined);
+            if (tieneLocal) {
+                hospitalesShareLocal++;
+            } else {
+                hospitalesShareNacional++;
+            }
+        } else {
+            hospitalesSinCalculo++;
+        }
+    });
+
+    return {
+        hospitalesAsignados: hospitalesConProyecto.length,
+        hospitalesCalculados: hospitalesCalculados,
+        hospitalesSinCalculo: hospitalesSinCalculo,
+        histrackLabel: histrackLabel,
+        totalHistrack: totalHistrack,
+        cosentyxVisible: cosentyxVisible,
+        totalPacientesCosentyx: cosentyxVisible ? totalPacientesCosentyx : null,
+        hospitalesShareLocal: cosentyxVisible ? hospitalesShareLocal : 0,
+        hospitalesShareNacional: cosentyxVisible ? hospitalesShareNacional : 0
+    };
+}
+
+/**
+ * Renderiza HTML seguro de la tarjeta de resumen agregado SIM v2.
+ */
+function renderizarResumenProyectoSimV2(proyectoId, resumen) {
+    let cosentyxHtml = '';
+    if (resumen.cosentyxVisible) {
+        cosentyxHtml = `
+            <div class="impact-metric">
+                <span class="impact-metric-label">Total pacientes Cosentyx</span>
+                <span class="impact-metric-value">${formatearNumeroSim(resumen.totalPacientesCosentyx)}</span>
+            </div>
+            <div class="impact-metric">
+                <span class="impact-metric-label">Share local aplicado en</span>
+                <span class="impact-metric-value">${formatearNumeroSim(resumen.hospitalesShareLocal)} hospital${resumen.hospitalesShareLocal === 1 ? '' : 'es'}</span>
+            </div>
+            <div class="impact-metric">
+                <span class="impact-metric-label">Share nacional/default en</span>
+                <span class="impact-metric-value">${formatearNumeroSim(resumen.hospitalesShareNacional)} hospital${resumen.hospitalesShareNacional === 1 ? '' : 'es'}</span>
+            </div>
+        `;
+    } else {
+        cosentyxHtml = `
+            <div class="impact-metric">
+                <span class="impact-metric-label">Cosentyx</span>
+                <span class="impact-metric-value">No visible como output en esta fase</span>
+            </div>
+        `;
+    }
+
+    let notaCalculo = '';
+    if (resumen.hospitalesCalculados === 0 && resumen.hospitalesAsignados > 0) {
+        notaCalculo = `
+            <div style="margin-top: 6px; font-size: 11px; color: #6b7280; font-style: italic;">
+                Calcula impactos para ver el resumen agregado del proyecto.
+            </div>
+        `;
+    }
+
+    return `
+        <div class="impact-card" style="background: #eef6ff;">
+            <h4>Resumen agregado SIM v2</h4>
+            <div class="impact-metric">
+                <span class="impact-metric-label">Hospitales asignados</span>
+                <span class="impact-metric-value">${formatearNumeroSim(resumen.hospitalesAsignados)}</span>
+            </div>
+            <div class="impact-metric">
+                <span class="impact-metric-label">Hospitales calculados</span>
+                <span class="impact-metric-value">${formatearNumeroSim(resumen.hospitalesCalculados)}</span>
+            </div>
+            <div class="impact-metric">
+                <span class="impact-metric-label">Pendientes de cálculo</span>
+                <span class="impact-metric-value">${formatearNumeroSim(resumen.hospitalesSinCalculo)}</span>
+            </div>
+            <div class="impact-metric">
+                <span class="impact-metric-label">Output HISTRACK</span>
+                <span class="impact-metric-value">${escaparHTML(resumen.histrackLabel)}</span>
+            </div>
+            <div class="impact-metric">
+                <span class="impact-metric-label">Total HISTRACK</span>
+                <span class="impact-metric-value">${formatearNumeroSim(resumen.totalHistrack)}</span>
+            </div>
+            ${cosentyxHtml}
+            ${notaCalculo}
+        </div>
+    `;
+}
+
 // ===== HELPERS SIM v2 — parámetros y enriquecimiento =====
 
 /**
@@ -3760,6 +3884,10 @@ function abrirDetalleProyecto(proyectoId) {
         `;
     }
 
+    // Resumen agregado SIM v2
+    const resumenSimV2 = calcularResumenProyectoSimV2(proyectoId);
+    const resumenSimV2Html = renderizarResumenProyectoSimV2(proyectoId, resumenSimV2);
+
     let contenidoHtml = `
         <div class="impact-card">
             <h4>Información del Proyecto</h4>
@@ -3777,6 +3905,7 @@ function abrirDetalleProyecto(proyectoId) {
             </div>
         </div>
         ${metodologiaHtml}
+        ${resumenSimV2Html}
     `;
 
     if (hospitalesConProyecto.length > 0) {

@@ -3723,6 +3723,12 @@ function abrirDetalleProyecto(proyectoId) {
         const visibilidadCosentyx = config.cosentyxVisible
             ? 'Visible como capa interna/comercial'
             : 'No visible en esta fase';
+        const shareLabel = config.cosentyxVisible
+            ? 'Share Cosentyx default'
+            : 'Share Cosentyx';
+        const shareValue = config.cosentyxVisible
+            ? formatearPorcentajeSim(config.shareCosentyxDefault)
+            : 'No aplica como output visible';
         metodologiaHtml = `
             <div class="impact-card">
                 <h4>Metodología SIM v2</h4>
@@ -3739,8 +3745,8 @@ function abrirDetalleProyecto(proyectoId) {
                     <span class="impact-metric-value">${escaparHTML(config.etiquetaOrigen)}</span>
                 </div>
                 <div class="impact-metric">
-                    <span class="impact-metric-label">Share Cosentyx default</span>
-                    <span class="impact-metric-value">${formatearPorcentajeSim(config.shareCosentyxDefault)}</span>
+                    <span class="impact-metric-label">${escaparHTML(shareLabel)}</span>
+                    <span class="impact-metric-value">${escaparHTML(shareValue)}</span>
                 </div>
                 <div class="impact-metric">
                     <span class="impact-metric-label">Visibilidad Cosentyx</span>

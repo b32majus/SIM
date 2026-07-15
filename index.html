@@ -1716,12 +1716,14 @@ function construirContextoNarrativa(proyectoId, hospital, impacto) {
         ? impacto.shareCosentyxOrigen
         : ((getShareCosentyxOverride(hospital, proyectoId) !== undefined) ? 'local' : 'nacional');
 
+    const histrackValor = getHistrackValorDesdeImpacto(proyectoId, impacto);
+
     return {
         territorio: territorioActual || 'territorio seleccionado',
         hospital: hospital.nombre || 'Hospital',
         poblacion: formatearNumeroSim(hospital.poblacion),
-        impacto_histrack: (impacto && typeof impacto.histrackValor === 'number')
-            ? formatearNumeroSim(impacto.histrackValor)
+        impacto_histrack: (typeof histrackValor === 'number')
+            ? formatearNumeroSim(histrackValor)
             : 'No calculado',
         histrack_label: (impacto && impacto.histrackLabel)
             ? impacto.histrackLabel
@@ -1750,6 +1752,40 @@ function renderizarPlantillaNarrativa(texto, contexto) {
     return escaparHTML(resultado);
 }
 
+/**
+ * Extrae histrackValor de un impacto, con fallback a campos legacy.
+ * No muta el objeto impacto. Prioridad: histrackValor > campo legacy > null.
+ */
+function getHistrackValorDesdeImpacto(proyectoId, impacto) {
+    if (!impacto || impacto.error) return null;
+    if (typeof impacto.histrackValor === 'number' && !isNaN(impacto.histrackValor)) {
+        return impacto.histrackValor;
+    }
+    var legacyField;
+    switch (proyectoId) {
+        case 'HS-Connect-AP ':
+        case 'HS-Connect Intra':
+        case 'EspANDE ':
+            legacyField = impacto.impactoNuevosPacientes;
+            break;
+        case 'HS-Efficiency':
+            legacyField = impacto.incrementoPacientesTratados;
+            break;
+        case 'HS-PROMueve-Derma':
+        case 'HS-PROMUEVE-FH':
+        case 'PROMUEVE EspA':
+        case 'PROMueve APs':
+            legacyField = impacto.incrementoPacientes;
+            break;
+        default:
+            return null;
+    }
+    if (typeof legacyField === 'number' && !isNaN(legacyField)) {
+        return legacyField;
+    }
+    return null;
+}
+
 // ===== HELPERS SIM v2 — resumen agregado por proyecto =====
 
 /**
@@ -1776,8 +1812,9 @@ function calcularResumenProyectoSimV2(proyectoId) {
         const impacto = hospital.impactos && hospital.impactos[proyectoId];
         if (impacto && !impacto.error) {
             hospitalesCalculados++;
-            if (typeof impacto.histrackValor === 'number') {
-                totalHistrack += impacto.histrackValor;
+            const histrackValor = getHistrackValorDesdeImpacto(proyectoId, impacto);
+            if (typeof histrackValor === 'number') {
+                totalHistrack += histrackValor;
             }
             if (cosentyxVisible && typeof impacto.pacientesCosentyx === 'number') {
                 totalPacientesCosentyx += impacto.pacientesCosentyx;

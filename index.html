@@ -1486,6 +1486,58 @@ const PLACEHOLDERS_NARRATIVA = [
     "share_cosentyx"
 ];
 
+// Narrativas limpias por proyecto (SIM v2)
+const NARRATIVA_PROYECTOS_SIM_V2 = {
+    "HS-Connect-AP ": {
+        tituloNarrativo: "Conexión AP-Dermatología para HS",
+        resumenEjecutivo: "El proyecto conecta Atención Primaria con Dermatología para reducir el infradiagnóstico de Hidradenitis Supurativa y acelerar la identificación de pacientes moderado-graves candidatos a circuito especializado.",
+        lecturaHistrack: "En {territorio}, el hospital {hospital} (población {poblacion}) genera un output HISTRACK de {impacto_histrack} nuevos pacientes diagnosticados ({histrack_label}).",
+        lecturaCosentyx: "Aplicando un share Cosentyx del {share_cosentyx}, se estiman {pacientes_cosentyx} pacientes candidatos a Cosentyx derivados de ese diagnóstico."
+    },
+    "HS-Connect Intra": {
+        tituloNarrativo: "Conexión Intrahospitalaria para HS",
+        resumenEjecutivo: "El proyecto expande el diagnóstico de HS dentro del ámbito hospitalario (Dermatología, Cirugía, Urgencias), reduciendo la latencia entre primera consulta y diagnóstico formal.",
+        lecturaHistrack: "En {territorio}, el hospital {hospital} (población {poblacion}) genera un output HISTRACK de {impacto_histrack} nuevos pacientes diagnosticados intrahospitalariamente ({histrack_label}).",
+        lecturaCosentyx: "Aplicando un share Cosentyx del {share_cosentyx}, se estiman {pacientes_cosentyx} pacientes candidatos a Cosentyx derivados de ese diagnóstico."
+    },
+    "HS-Efficiency": {
+        tituloNarrativo: "Capacidad asistencial en Dermatología para HS",
+        resumenEjecutivo: "El proyecto genera capacidad asistencial en Dermatología y traduce esa capacidad en incremento de pacientes HS Hurley II-III tratados o candidatos a tratamiento.",
+        lecturaHistrack: "En {territorio}, el hospital {hospital} (población {poblacion}) genera un output HISTRACK de {impacto_histrack} pacientes adicionales ({histrack_label}).",
+        lecturaCosentyx: "Aplicando un share Cosentyx del {share_cosentyx}, se estiman {pacientes_cosentyx} pacientes candidatos a Cosentyx derivados de ese incremento de tratados."
+    },
+    "HS-PROMueve-Derma": {
+        tituloNarrativo: "Estandarización del seguimiento en Dermatología",
+        resumenEjecutivo: "El proyecto mide la estandarización del seguimiento en Dermatología y la aceleración del switch a biológicos en Hidradenitis Supurativa.",
+        lecturaHistrack: "En {territorio}, el hospital {hospital} (población {poblacion}) genera un output HISTRACK de {impacto_histrack} pacientes adicionales en switch a biológico ({histrack_label}).",
+        lecturaCosentyx: "Aplicando un share Cosentyx del {share_cosentyx}, se estiman {pacientes_cosentyx} pacientes candidatos a Cosentyx derivados de ese switch."
+    },
+    "HS-PROMUEVE-FH": {
+        tituloNarrativo: "Seguimiento Farmacia Hospitalaria–Especialista",
+        resumenEjecutivo: "El proyecto mide el seguimiento conjunto Farmacia Hospitalaria–Especialista: adherencia, persistencia, seguridad y detección de pacientes no controlados.",
+        lecturaHistrack: "En {territorio}, el hospital {hospital} (población {poblacion}) genera un output HISTRACK de {impacto_histrack} pacientes adicionales en switch a biológico ({histrack_label}).",
+        lecturaCosentyx: "Aplicando un share Cosentyx del {share_cosentyx}, se estiman {pacientes_cosentyx} pacientes candidatos a Cosentyx derivados de ese switch."
+    },
+    "PROMUEVE EspA": {
+        tituloNarrativo: "Switch a biológicos en Espondiloartritis Axial",
+        resumenEjecutivo: "El proyecto mide el incremento de switch a biológicos en Espondiloartritis Axial, estandarizando criterios de remisión y detección de pacientes no controlados.",
+        lecturaHistrack: "En {territorio}, el hospital {hospital} (población {poblacion}) genera un output HISTRACK de {impacto_histrack} pacientes adicionales en switch a biológico ({histrack_label}).",
+        lecturaCosentyx: "Aplicando un share Cosentyx del {share_cosentyx}, se estiman {pacientes_cosentyx} pacientes candidatos a Cosentyx derivados de ese switch."
+    },
+    "PROMueve APs": {
+        tituloNarrativo: "Switch a biológicos en Artritis Psoriásica",
+        resumenEjecutivo: "El proyecto mide el incremento de switch a biológicos en Artritis Psoriásica, combinando criterios clínicos y seguimiento estructurado.",
+        lecturaHistrack: "En {territorio}, el hospital {hospital} (población {poblacion}) genera un output HISTRACK de {impacto_histrack} pacientes adicionales en switch a biológico ({histrack_label}).",
+        lecturaCosentyx: "Aplicando un share Cosentyx del {share_cosentyx}, se estiman {pacientes_cosentyx} pacientes candidatos a Cosentyx derivados de ese switch."
+    },
+    "EspANDE ": {
+        tituloNarrativo: "Expansión diagnóstica agnóstica en Reumatología",
+        resumenEjecutivo: "El proyecto expande diagnóstico en Reumatología de forma agnóstica, combinando APs y EspAax. El output visible es diagnóstico HISTRACK, no caída comercial a Cosentyx.",
+        lecturaHistrack: "En {territorio}, el hospital {hospital} (población {poblacion}) genera un output HISTRACK de {impacto_histrack} nuevos pacientes diagnosticados ({histrack_label}).",
+        lecturaCosentyx: "Cosentyx no se muestra como output visible en esta fase. La estimación comercial permanece como capa interna del modelo."
+    }
+};
+
 // ===== HELPERS SIM v2 =====
 
 /**
@@ -1623,6 +1675,79 @@ function limpiarShareCosentyxDesdeModal(hospitalId, proyectoId) {
     actualizarResumenes();
     abrirDetalleProyecto(proyectoId);
     console.log('✅ Share local eliminado, usando default nacional:', proyectoId, hospitalId);
+}
+
+// ===== HELPERS SIM v2 — narrativa y metodología =====
+
+/**
+ * Formatea un número para presentación en SIM v2.
+ */
+function formatearNumeroSim(valor) {
+    if (typeof valor === 'number' && !isNaN(valor)) return valor.toLocaleString('es-ES');
+    return 'No calculado';
+}
+
+/**
+ * Formatea un decimal de share (0.37) a porcentaje legible ('37,0%').
+ */
+function formatearPorcentajeSim(valorDecimal) {
+    if (typeof valorDecimal === 'number' && !isNaN(valorDecimal)) {
+        return (valorDecimal * 100).toFixed(1).replace('.', ',') + '%';
+    }
+    return 'No definido';
+}
+
+/**
+ * Devuelve la narrativa de un proyecto por su ID.
+ */
+function getNarrativaProyecto(proyectoId) {
+    return NARRATIVA_PROYECTOS_SIM_V2[proyectoId] || null;
+}
+
+/**
+ * Construye el contexto de placeholders para una instancia hospital + proyecto.
+ */
+function construirContextoNarrativa(proyectoId, hospital, impacto) {
+    const config = getConfigProyecto(proyectoId);
+    const shareAplicado = (impacto && typeof impacto.shareCosentyxAplicado === 'number')
+        ? impacto.shareCosentyxAplicado
+        : getShareCosentyxAplicado(hospital, proyectoId);
+    const shareOrigen = (impacto && impacto.shareCosentyxOrigen)
+        ? impacto.shareCosentyxOrigen
+        : ((getShareCosentyxOverride(hospital, proyectoId) !== undefined) ? 'local' : 'nacional');
+
+    return {
+        territorio: territorioActual || 'territorio seleccionado',
+        hospital: hospital.nombre || 'Hospital',
+        poblacion: formatearNumeroSim(hospital.poblacion),
+        impacto_histrack: (impacto && typeof impacto.histrackValor === 'number')
+            ? formatearNumeroSim(impacto.histrackValor)
+            : 'No calculado',
+        histrack_label: (impacto && impacto.histrackLabel)
+            ? impacto.histrackLabel
+            : getOutputHistrackLabel(proyectoId),
+        share_cosentyx: formatearPorcentajeSim(shareAplicado) + ' (' + shareOrigen + ')',
+        pacientes_cosentyx: (impacto && typeof impacto.pacientesCosentyx === 'number')
+            ? formatearNumeroSim(impacto.pacientesCosentyx)
+            : 'No calculado',
+        origen_share: shareOrigen
+    };
+}
+
+/**
+ * Sustituye placeholders {clave} en un texto por valores del contexto.
+ * Escapa el resultado final con escaparHTML().
+ */
+function renderizarPlantillaNarrativa(texto, contexto) {
+    if (!texto) return '';
+    var resultado = texto;
+    for (var clave in contexto) {
+        if (Object.prototype.hasOwnProperty.call(contexto, clave)) {
+            var regex = new RegExp('\\{' + clave + '\\}', 'g');
+            resultado = resultado.replace(regex, String(contexto[clave] || ''));
+        }
+    }
+    return escaparHTML(resultado);
 }
 
 // ===== HELPERS SIM v2 — parámetros y enriquecimiento =====
@@ -3592,6 +3717,43 @@ function abrirDetalleProyecto(proyectoId) {
     const cosentyxVisible = config ? config.cosentyxVisible : false;
     const shareDefaultPct = config ? Math.round(config.shareCosentyxDefault * 100) : 0;
 
+    // Tarjeta de metodología SIM v2
+    let metodologiaHtml = '';
+    if (config) {
+        const visibilidadCosentyx = config.cosentyxVisible
+            ? 'Visible como capa interna/comercial'
+            : 'No visible en esta fase';
+        metodologiaHtml = `
+            <div class="impact-card">
+                <h4>Metodología SIM v2</h4>
+                <div class="impact-metric">
+                    <span class="impact-metric-label">Output HISTRACK</span>
+                    <span class="impact-metric-value">${escaparHTML(config.outputHistrack)}</span>
+                </div>
+                <div class="impact-metric">
+                    <span class="impact-metric-label">Tipo</span>
+                    <span class="impact-metric-value">${escaparHTML(config.etiquetaTipo)}</span>
+                </div>
+                <div class="impact-metric">
+                    <span class="impact-metric-label">Origen</span>
+                    <span class="impact-metric-value">${escaparHTML(config.etiquetaOrigen)}</span>
+                </div>
+                <div class="impact-metric">
+                    <span class="impact-metric-label">Share Cosentyx default</span>
+                    <span class="impact-metric-value">${formatearPorcentajeSim(config.shareCosentyxDefault)}</span>
+                </div>
+                <div class="impact-metric">
+                    <span class="impact-metric-label">Visibilidad Cosentyx</span>
+                    <span class="impact-metric-value">${escaparHTML(visibilidadCosentyx)}</span>
+                </div>
+                <div class="impact-metric">
+                    <span class="impact-metric-label">Descripción metodológica</span>
+                    <span class="impact-metric-value" style="white-space: pre-line;">${escaparHTML(config.descripcionMetodologica)}</span>
+                </div>
+            </div>
+        `;
+    }
+
     let contenidoHtml = `
         <div class="impact-card">
             <h4>Información del Proyecto</h4>
@@ -3608,6 +3770,7 @@ function abrirDetalleProyecto(proyectoId) {
                 <span class="impact-metric-value">${hospitalesConProyecto.length}</span>
             </div>
         </div>
+        ${metodologiaHtml}
     `;
 
     if (hospitalesConProyecto.length > 0) {
@@ -3679,6 +3842,27 @@ function abrirDetalleProyecto(proyectoId) {
                 `;
             }
 
+            // Narrativa por hospital
+            const narrativa = getNarrativaProyecto(proyectoId);
+            let narrativaHtml = '';
+            if (narrativa) {
+                const ctx = construirContextoNarrativa(proyectoId, hospital, impacto);
+                narrativaHtml = `
+                    <div style="margin-top: 8px; padding: 8px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px;">
+                        <div style="font-size: 11px; font-weight: 600; color: #1e293b; margin-bottom: 4px;">📖 Lectura ejecutiva</div>
+                        <div style="font-size: 11px; color: #475569; margin-bottom: 4px; line-height: 1.4;">
+                            ${renderizarPlantillaNarrativa(narrativa.resumenEjecutivo, ctx)}
+                        </div>
+                        <div style="font-size: 11px; color: #475569; margin-bottom: 4px; line-height: 1.4;">
+                            ${renderizarPlantillaNarrativa(narrativa.lecturaHistrack, ctx)}
+                        </div>
+                        <div style="font-size: 11px; color: #475569; line-height: 1.4;">
+                            ${renderizarPlantillaNarrativa(narrativa.lecturaCosentyx, ctx)}
+                        </div>
+                    </div>
+                `;
+            }
+
             contenidoHtml += `
                 <div style="border: 1px solid #e0e6ed; border-radius: 6px; padding: 12px; margin: 8px 0; background: #f9fafb;">
                     <div style="font-weight: 500; margin-bottom: 4px;">${escaparHTML(hospital.nombre)}</div>
@@ -3689,6 +3873,7 @@ function abrirDetalleProyecto(proyectoId) {
                         📊 ${impactoTexto}
                     </div>
                     ${cosentyxHtml}
+                    ${narrativaHtml}
                 </div>
             `;
         });
